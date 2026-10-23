@@ -225,9 +225,10 @@ compose.desktop {
             packageVersion = providers.gradleProperty("package.version").get()
         }
 
-        if (getLocalProperty("ani.desktop.proguard")?.toBooleanStrict() != false) {
-            buildTypes.release.proguard {
-                isEnabled.set(true)
+        val proguardEnabled = getLocalProperty("ani.desktop.proguard")?.toBooleanStrict() != false
+        buildTypes.release.proguard {
+            isEnabled.set(proguardEnabled)
+            if (proguardEnabled) {
                 // 7.9.1 起 (proguard-core 9.3.2 + kotlin-metadata-jvm 2.3.0) 才能读 Kotlin 2.4 metadata.
                 version = "7.9.1"
                 optimize.set(true)
