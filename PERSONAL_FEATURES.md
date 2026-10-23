@@ -1,0 +1,25 @@
+# YuWuChen82 个人版额外功能
+
+本页记录 YuWuChen82 个人版相对 [open-ani/animeko 官方版](https://github.com/open-ani/animeko) 额外维护的功能和发布方式。具体差异会随上游更新而变化；请以当前个人版代码和实际发布为准。
+
+个人版目前发布 Windows x64 版本：[下载最新版本](https://github.com/YuWuChen82/animeko/releases/latest)。Android、iOS、macOS、Linux 等平台请使用官方版本。
+
+## 播放器快捷键
+
+在「设置 → 应用与界面 → 播放器快捷键」中，可以点击某个操作右侧的按键框，然后按下按键完成绑定。页面列出各项播放器操作，也可以恢复默认快捷键。
+
+目前支持字母、数字、方向键、空格和 F1–F12；Esc 取消录入，Backspace 或 Delete 清除绑定。暂不支持 Ctrl、Alt、Meta 等修饰键组合。按键冲突时可以确认交换绑定。
+
+## 按番剧条目记忆音轨和字幕
+
+播放器会按 Bangumi 番剧条目（subject，通常对应一季）保存手动选择的音轨和字幕。播放同一条目下的其他集数、重新进入播放页或重启应用后，会尝试恢复此前选择；关闭字幕的选择也会记住。
+
+此功能可以在「设置 → 数据源与播放 → 播放器和弹幕过滤」中启用或关闭，也可以清除已记忆的选择。应用最多保留最近使用的 128 个番剧条目偏好。恢复时根据音轨名称、语言和标签匹配当前视频提供的轨道；如果当前视频没有对应轨道，就不会强行切换。
+
+## 个人版应用内更新
+
+个人版应用内检查和下载更新时使用 [YuWuChen82/animeko Releases](https://github.com/YuWuChen82/animeko/releases)，不会检查官方版发布源。当前这个更新渠道提供 Windows x64 个人版。
+
+## 自动同步和发布
+
+[GitHub Actions 工作流](.github/workflows/personal-sync.yml)每天北京时间 04:17 检查官方仓库更新。发现上游变化后，工作流会同步并运行播放器、设置和 Windows 更新回归检查，再构建 Windows x64 安装包并发布到个人仓库 Releases。失败的验证不会发布该次更新。提交到个人仓库 `main` 分支也会触发 Windows 构建和发布流程.
