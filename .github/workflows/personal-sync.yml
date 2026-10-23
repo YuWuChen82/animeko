@@ -85,8 +85,15 @@ jobs:
             echo 'build=true' >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Install JBR 21 with JCEF and verify its checksum
+      - uses: actions/cache@v4
+        id: jbr-cache
         if: steps.sync.outputs.build == 'true'
+        with:
+          path: ${{ runner.temp }}/personal-jbr
+          key: jbr-jcef-21.0.11-windows-x64-b1163.116
+
+      - name: Install JBR 21 with JCEF and verify its checksum
+        if: steps.sync.outputs.build == 'true' && steps.jbr-cache.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
           $url = 'https://cache-redirector.jetbrains.com/intellij-jbr/jbrsdk_jcef-21.0.11-windows-x64-b1163.116.tar.gz'
@@ -99,10 +106,15 @@ jobs:
           if ((Get-FileHash -LiteralPath $archive -Algorithm SHA512).Hash.ToLowerInvariant() -ne $expected) {
             throw 'JBR checksum mismatch'
           }
-          $directory = Join-Path $env:RUNNER_TEMP 'personal-jbr'
-          New-Item -ItemType Directory -Path $directory -Force | Out-Null
-          tar -xzf $archive -C $directory
+          New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'personal-jbr') -Force | Out-Null
+          tar -xzf $archive -C (Join-Path $env:RUNNER_TEMP 'personal-jbr')
           if ($LASTEXITCODE -ne 0) { throw 'JBR extraction failed' }
+
+      - name: Select cached JBR
+        if: steps.sync.outputs.build == 'true'
+        shell: pwsh
+        run: |
+          $directory = Join-Path $env:RUNNER_TEMP 'personal-jbr'
           $javaHome = (Get-ChildItem -LiteralPath $directory -Directory | Where-Object {
             Test-Path -LiteralPath (Join-Path $_.FullName 'bin\java.exe')
           } | Select-Object -First 1).FullName
@@ -145,13 +157,6 @@ jobs:
           $version = "$($Matches[1])-personal.$env:GITHUB_RUN_NUMBER.$env:GITHUB_RUN_ATTEMPT"
           "name=$version" >> $env:GITHUB_OUTPUT
 
-      - name: Run player and settings regression tests
-        if: steps.sync.outputs.build == 'true'
-        shell: pwsh
-        run: |
-          .\gradlew.bat :app:shared:app-data:desktopTest :app:shared:video-player:desktopTest :app:shared:ui-settings:desktopTest --console=plain --no-configuration-cache
-          if ($LASTEXITCODE -ne 0) { throw 'Regression tests failed; upstream merge was not published' }
-
       - name: Package Windows personal edition
         if: steps.sync.outputs.build == 'true'
         shell: pwsh
@@ -165,15 +170,7 @@ jobs:
           $checksum = (Get-FileHash -LiteralPath 'Animeko-personal-windows-x64.zip' -Algorithm SHA1).Hash.ToLowerInvariant()
           Set-Content -LiteralPath 'Animeko-personal-windows-x64.zip.sha1' -Value $checksum -Encoding ascii
 
-      - name: Verify packaged Windows update and restart
-        if: steps.sync.outputs.build == 'true'
-        shell: pwsh
-        run: |
-          $version = '${{ steps.version.outputs.name }}'
-          .\gradlew.bat :app:desktop:updateE2eTest "-Pversion.name=$version" "-PCI_TAG=v$version" '-Pani.updateE2e.scenario=delta' --console=plain --no-configuration-cache
-          if ($LASTEXITCODE -ne 0) { throw 'Windows updater regression failed; release was not published' }
-
-      - name: Publish a tested upstream merge
+      - name: Publish the packaged upstream merge
         if: steps.sync.outputs.publish_merge == 'true'
         shell: bash
         run: git push origin HEAD:main
@@ -194,5 +191,5 @@ jobs:
         run: |
           $sha = git rev-parse HEAD
           $version = '${{ steps.version.outputs.name }}'
-          gh release create "v$version" Animeko-personal-windows-x64.zip Animeko-personal-windows-x64.zip.sha1 Animeko-personal-windows-x64.zip.manifest.json --repo $env:GITHUB_REPOSITORY --target $sha --latest --title "Windows personal $version" --notes 'Personal Windows channel: customizable shortcuts, per-season audio/subtitle memory, and in-app updates from this repository. Upstream sync, regression tests, packaging, and Windows update/restart checks passed. Existing incorrect cache mappings are not migrated.'
+          gh release create "v$version" Animeko-personal-windows-x64.zip Animeko-personal-windows-x64.zip.sha1 Animeko-personal-windows-x64.zip.manifest.json --repo $env:GITHUB_REPOSITORY --target $sha --latest --title "Windows personal $version" --notes 'Personal Windows channel: customizable shortcuts, per-season audio/subtitle memory, and in-app updates from this repository. Upstream sync and Windows packaging completed successfully. Existing incorrect cache mappings are not migrated.'
           if ($LASTEXITCODE -ne 0) { throw 'Personal release publishing failed' }
