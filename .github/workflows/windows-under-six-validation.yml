@@ -1,0 +1,114 @@
+name: Windows under-six validation
+
+on:
+  push:
+    branches: [codex/windows-under-six-validation]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: under-six-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    if: github.repository == 'YuWuChen82/animeko'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      JAVA_TOOL_OPTIONS: -Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.WindowsSelectorProvider
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/cache@v4
+        id: jbr-cache
+        with:
+          path: ${{ runner.temp }}/personal-jbr
+          key: jbr-jcef-21.0.11-windows-x64-b1163.116
+
+      - name: Install JBR 21 with JCEF and verify its checksum
+        if: steps.jbr-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $url = 'https://cache-redirector.jetbrains.com/intellij-jbr/jbrsdk_jcef-21.0.11-windows-x64-b1163.116.tar.gz'
+          $archive = Join-Path $env:RUNNER_TEMP 'personal-jbr.tar.gz'
+          Invoke-WebRequest -Uri $url -OutFile $archive
+          $checksumFile = Join-Path $env:RUNNER_TEMP 'personal-jbr.checksum'
+          Invoke-WebRequest -Uri "$url.checksum" -OutFile $checksumFile
+          $checksum = Get-Content -LiteralPath $checksumFile -Raw
+          $expected = ($checksum.Trim() -split '\s+')[0].ToLowerInvariant()
+          if ((Get-FileHash -LiteralPath $archive -Algorithm SHA512).Hash.ToLowerInvariant() -ne $expected) {
+            throw 'JBR checksum mismatch'
+          }
+          New-Item -ItemType Directory -Path (Join-Path $env:RUNNER_TEMP 'personal-jbr') -Force | Out-Null
+          tar -xzf $archive -C (Join-Path $env:RUNNER_TEMP 'personal-jbr')
+          if ($LASTEXITCODE -ne 0) { throw 'JBR extraction failed' }
+
+      - name: Select cached JBR
+        shell: pwsh
+        run: |
+          $directory = Join-Path $env:RUNNER_TEMP 'personal-jbr'
+          $javaHome = (Get-ChildItem -LiteralPath $directory -Directory | Where-Object {
+            Test-Path -LiteralPath (Join-Path $_.FullName 'bin\\java.exe')
+          } | Select-Object -First 1).FullName
+          if (-not $javaHome) { throw 'JBR installation was not found' }
+          "JAVA_HOME=$javaHome" >> $env:GITHUB_ENV
+          (Join-Path $javaHome 'bin') >> $env:GITHUB_PATH
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: true
+
+      - name: Configure Dandanplay API credentials
+        shell: pwsh
+        env:
+          DANDANPLAY_APP_ID: ${{ secrets.DANDANPLAY_APP_ID }}
+          DANDANPLAY_APP_SECRET: ${{ secrets.DANDANPLAY_APP_SECRET }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:DANDANPLAY_APP_ID) -or [string]::IsNullOrWhiteSpace($env:DANDANPLAY_APP_SECRET)) {
+            throw 'Configure DANDANPLAY_APP_ID and DANDANPLAY_APP_SECRET under Settings > Secrets and variables > Actions before building a personal release.'
+          }
+          @"
+          ani.dandanplay.app.id=$env:DANDANPLAY_APP_ID
+          ani.dandanplay.app.secret=$env:DANDANPLAY_APP_SECRET
+          ani.desktop.proguard=false
+          "@ | Set-Content -LiteralPath 'local.properties' -Encoding ascii
+
+      - name: Select a monotonic personal build version
+        id: version
+        shell: pwsh
+        run: |
+          $tag = gh api repos/open-ani/animeko/releases/latest --jq .tag_name
+          if ($LASTEXITCODE -ne 0 -or $tag -notmatch '^v(\d+\.\d+\.\d+)$') { throw 'Could not read the upstream stable version' }
+          $version = "$($Matches[1])-personal.validation.$env:GITHUB_RUN_NUMBER.$env:GITHUB_RUN_ATTEMPT"
+          "name=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Package Windows personal edition
+        shell: pwsh
+        run: |
+          $version = '${{ steps.version.outputs.name }}'
+          .\\gradlew.bat :ci-helper:zipDesktopDistribution :ci-helper:generateDesktopDistributionManifest "-Pversion.name=$version" "-PCI_TAG=v$version" --console=plain --parallel --no-configuration-cache
+          if ($LASTEXITCODE -ne 0) { throw 'Packaging failed' }
+          $package = "ci-helper/build/distributions/ani-$version.zip"
+          Move-Item -LiteralPath $package -Destination 'Animeko-personal-windows-x64.zip' -Force
+          Move-Item -LiteralPath "$package.manifest.json" -Destination 'Animeko-personal-windows-x64.zip.manifest.json' -Force
+          $checksum = (Get-FileHash -LiteralPath 'Animeko-personal-windows-x64.zip' -Algorithm SHA1).Hash.ToLowerInvariant()
+          Set-Content -LiteralPath 'Animeko-personal-windows-x64.zip.sha1' -Value $checksum -Encoding ascii
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Animeko-windows-under-six-validation
+          path: |
+            Animeko-personal-windows-x64.zip
+            Animeko-personal-windows-x64.zip.sha1
+            Animeko-personal-windows-x64.zip.manifest.json
+          retention-days: 3
