@@ -32,17 +32,26 @@ jobs:
       - name: Keep only the personal Windows workflow enabled
         shell: pwsh
         run: |
-          $workflows = gh api "repos/$env:GITHUB_REPOSITORY/actions/workflows" --paginate --jq '.workflows[] | select(.path != ".github/workflows/personal-sync.yml") | .id'
+          $response = gh api "repos/$env:GITHUB_REPOSITORY/actions/workflows?per_page=100"
           if ($LASTEXITCODE -ne 0) { throw 'Could not list inherited workflows' }
+          $workflows = ($response | ConvertFrom-Json).workflows
           foreach ($workflow in $workflows) {
-            gh api --method PUT "repos/$env:GITHUB_REPOSITORY/actions/workflows/$workflow/disable"
-            if ($LASTEXITCODE -ne 0) { throw "Could not disable inherited workflow $workflow" }
-            $runs = gh api "repos/$env:GITHUB_REPOSITORY/actions/workflows/$workflow/runs?per_page=20" --jq '.workflow_runs[] | select(.status != "completed") | .id'
-            if ($LASTEXITCODE -ne 0) { throw "Could not list inherited runs for $workflow" }
+            if ($workflow.path -eq '.github/workflows/personal-sync.yml') { continue }
+            $id = $workflow.id
+            if ($workflow.state -eq 'active') {
+              gh api --method PUT "repos/$env:GITHUB_REPOSITORY/actions/workflows/$id/disable"
+              if ($LASTEXITCODE -ne 0) {
+                $state = gh api "repos/$env:GITHUB_REPOSITORY/actions/workflows/$id" --jq .state
+                if ($LASTEXITCODE -ne 0 -or $state -eq 'active') { throw "Could not disable inherited workflow $id" }
+              }
+            }
+            $runs = gh api "repos/$env:GITHUB_REPOSITORY/actions/workflows/$id/runs?per_page=20" --jq '.workflow_runs[] | select(.status != "completed") | .id'
+            if ($LASTEXITCODE -ne 0) { throw "Could not list inherited runs for $id" }
             foreach ($run in $runs) {
               gh api --method POST "repos/$env:GITHUB_REPOSITORY/actions/runs/$run/cancel" --silent
               if ($LASTEXITCODE -ne 0) { Write-Warning "Run $run may already have finished" }
             }
+            Write-Output "Disabled inherited workflow: $($workflow.name)"
           }
 
       - name: Prepare an upstream merge without publishing it
