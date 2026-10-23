@@ -12,7 +12,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: personal-main
+  group: personal-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
@@ -37,6 +37,12 @@ jobs:
           foreach ($workflow in $workflows) {
             gh api --method PUT "repos/$env:GITHUB_REPOSITORY/actions/workflows/$workflow/disable"
             if ($LASTEXITCODE -ne 0) { throw "Could not disable inherited workflow $workflow" }
+            $runs = gh api "repos/$env:GITHUB_REPOSITORY/actions/workflows/$workflow/runs?per_page=20" --jq '.workflow_runs[] | select(.status != "completed") | .id'
+            if ($LASTEXITCODE -ne 0) { throw "Could not list inherited runs for $workflow" }
+            foreach ($run in $runs) {
+              gh api --method POST "repos/$env:GITHUB_REPOSITORY/actions/runs/$run/cancel" --silent
+              if ($LASTEXITCODE -ne 0) { Write-Warning "Run $run may already have finished" }
+            }
           }
 
       - name: Prepare an upstream merge without publishing it
