@@ -1,0 +1,4 @@
+<resources>
+    <string name="danmaku_toggle_enabled">Danmaku enabled</string>
+    <string name="danmaku_toggle_disabled">Danmaku disabled</string>
+</resources>

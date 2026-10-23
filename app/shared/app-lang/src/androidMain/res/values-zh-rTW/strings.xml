@@ -1527,8 +1527,6 @@
     <string name="subject_episode_statistics_danmaku_sources_count">%1$d 個彈幕源，共計 %2$d 條彈幕</string>
     <string name="subject_episode_statistics_show_less">顯示更少</string>
     <string name="subject_episode_statistics_show_more">顯示更多</string>
-    <string name="subject_episode_danmaku_toggle_enabled">彈幕已开启</string>
-    <string name="subject_episode_danmaku_toggle_disabled">弹幕已关闭</string>
     <string name="subject_episode_statistics_danmaku_disabled">彈幕已關閉，可在播放器內開啟</string>
     <string name="subject_episode_statistics_danmaku_loading">彈幕載入中</string>
     <string name="subject_episode_statistics_now_playing">正在播放: </string>

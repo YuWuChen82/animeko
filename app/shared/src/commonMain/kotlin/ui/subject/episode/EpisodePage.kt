@@ -1066,8 +1066,8 @@ private fun EpisodeVideo(
     val context by rememberUpdatedState(LocalContext.current)
     val navigator = LocalNavigator.current
     val toaster = LocalToaster.current
-    val danmakuEnabledText = stringResource(Lang.subject_episode_danmaku_toggle_enabled)
-    val danmakuDisabledText = stringResource(Lang.subject_episode_danmaku_toggle_disabled)
+    val danmakuEnabledText = stringResource(Lang.danmaku_toggle_enabled)
+    val danmakuDisabledText = stringResource(Lang.danmaku_toggle_disabled)
 
     // 回到前台、进出全屏后都先隐藏控制器
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
