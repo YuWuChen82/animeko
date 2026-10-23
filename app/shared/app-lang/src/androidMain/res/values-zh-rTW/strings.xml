@@ -1901,7 +1901,7 @@
     <string name="settings_mediasource_jsonapi_play_copy">複製</string>
 
     <string name="settings_player_track_memory">記住音軌和字幕</string>
-    <string name="settings_player_track_memory_description">按動畫記住手動選擇；換集、重新進入後按語言與名稱恢復，也會記住關閉字幕。</string>
+    <string name="settings_player_track_memory_description">按同一季動畫條目記住手動選擇；換集、重新進入和重啟後還原，也會記住關閉字幕。</string>
     <string name="settings_player_track_memory_clear">清除軌道記憶</string>
     <string name="settings_player_shortcuts">鍵盤快捷鍵</string>
     <string name="settings_player_shortcut_unbound">未綁定</string>
@@ -1924,6 +1924,7 @@
     <string name="settings_player_shortcut_speed_1">切換到 1 倍速</string>
     <string name="settings_player_shortcut_speed_2">切換到 2 倍速</string>
     <string name="settings_player_shortcut_speed_3">切換到 3 倍速</string>
+    <string name="settings_update_personal_source">更新來源：%1$s</string>
 </resources>
 
 <!--@formatter:on-->

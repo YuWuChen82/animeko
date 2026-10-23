@@ -142,13 +142,6 @@ import me.him188.ani.app.ui.lang.settings_update_in_app_download_disabled
 import me.him188.ani.app.ui.lang.settings_update_in_app_download_enabled
 import me.him188.ani.app.ui.lang.settings_update_new_version
 import me.him188.ani.app.ui.lang.settings_update_software
-import me.him188.ani.app.ui.lang.settings_update_type
-import me.him188.ani.app.ui.lang.settings_update_type_alpha
-import me.him188.ani.app.ui.lang.settings_update_type_alpha_short
-import me.him188.ani.app.ui.lang.settings_update_type_beta
-import me.him188.ani.app.ui.lang.settings_update_type_beta_short
-import me.him188.ani.app.ui.lang.settings_update_type_stable
-import me.him188.ani.app.ui.lang.settings_update_type_stable_short
 import me.him188.ani.app.ui.lang.settings_update_up_to_date
 import me.him188.ani.app.ui.lang.settings_update_view_changelog
 import me.him188.ani.app.ui.lang.settings_watch_together_description
@@ -175,6 +168,8 @@ import me.him188.ani.app.ui.settings.tabs.theme.ThemeGroup
 import me.him188.ani.app.ui.update.AppUpdateState
 import me.him188.ani.app.ui.update.AppUpdateViewModel
 import me.him188.ani.app.ui.update.NewVersion
+import me.him188.ani.app.ui.update.PersonalReleaseUpdates
+import me.him188.ani.app.ui.lang.settings_update_personal_source
 import me.him188.ani.app.ui.update.UpdateNotifier
 import me.him188.ani.utils.platform.annotations.TestOnly
 import me.him188.ani.utils.platform.isAndroid
@@ -391,7 +386,7 @@ fun SettingsScope.SoftwareUpdateGroup(
         RowButtonItem(
             onClick = {
                 uriHandler.openUri(
-                    "https://github.com/open-ani/ani/releases/tag/v${currentAniBuildConfig.versionName}",
+                    PersonalReleaseUpdates.RELEASES_URL,
                 )
             },
             icon = { Icon(Icons.Rounded.ArrowOutward, null) },
@@ -407,33 +402,12 @@ fun SettingsScope.SoftwareUpdateGroup(
             description = { Text(stringResource(Lang.settings_update_auto_check_description)) },
         )
         HorizontalDividerItem()
-        DropdownItem(
-            selected = { updateSettings.releaseClass },
-            values = { ReleaseClass.enabledEntries },
-            itemText = {
-                when (it) {
-                    ReleaseClass.ALPHA -> Text(stringResource(Lang.settings_update_type_alpha))
-                    ReleaseClass.BETA -> Text(stringResource(Lang.settings_update_type_beta))
-                    ReleaseClass.RC, // RC 实际上不会有
-                    ReleaseClass.STABLE -> Text(stringResource(Lang.settings_update_type_stable))
-                }
-            },
-            exposedItemText = {
-                when (it) {
-                    ReleaseClass.ALPHA -> Text(stringResource(Lang.settings_update_type_alpha_short))
-                    ReleaseClass.BETA -> Text(stringResource(Lang.settings_update_type_beta_short))
-                    ReleaseClass.RC, // RC 实际上不会有
-                    ReleaseClass.STABLE -> Text(stringResource(Lang.settings_update_type_stable_short))
-                }
-            },
-            onSelect = {
-                state.updateSettings.update(updateSettings.copy(releaseClass = it))
-            },
-            itemIcon = {
-                ReleaseClassIcon(it)
-            },
-            title = { Text(stringResource(Lang.settings_update_type)) },
-        )
+        RowButtonItem(
+            onClick = { uriHandler.openUri(PersonalReleaseUpdates.RELEASES_URL) },
+            icon = { Icon(Icons.Rounded.ArrowOutward, null) },
+        ) {
+            Text(stringResource(Lang.settings_update_personal_source, PersonalReleaseUpdates.REPOSITORY))
+        }
         if (!LocalPlatform.current.isIos()) {
             HorizontalDividerItem()
             SwitchItem(

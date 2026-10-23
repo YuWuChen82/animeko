@@ -1908,7 +1908,7 @@
     <string name="settings_mediasource_jsonapi_play_copy">Copy</string>
 
     <string name="settings_player_track_memory">Remember audio and subtitles</string>
-    <string name="settings_player_track_memory_description">Restore manual track choices for the same anime after changing episodes or reopening playback. Remembers subtitle off.</string>
+    <string name="settings_player_track_memory_description">Remember choices for the same anime season (subject). Restore language and name across episodes and app restarts, including disabled subtitles.</string>
     <string name="settings_player_track_memory_clear">Clear remembered tracks</string>
     <string name="settings_player_shortcuts">Keyboard shortcuts</string>
     <string name="settings_player_shortcut_unbound">Unassigned</string>
@@ -1931,6 +1931,7 @@
     <string name="settings_player_shortcut_speed_1">Playback speed 1x</string>
     <string name="settings_player_shortcut_speed_2">Playback speed 2x</string>
     <string name="settings_player_shortcut_speed_3">Playback speed 3x</string>
+    <string name="settings_update_personal_source">Update source: %1$s</string>
 </resources>
 
 <!--@formatter:on-->

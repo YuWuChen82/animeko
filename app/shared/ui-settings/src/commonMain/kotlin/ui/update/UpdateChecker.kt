@@ -31,10 +31,10 @@ import me.him188.ani.utils.platform.currentPlatform
 import me.him188.ani.utils.platform.isAndroidTv
 
 /**
- * @param serverUrls 版本 API 的服务器, 按顺序尝试, 前一个失败才用下一个. 端到端测试用它指向本机 mock 的服务器.
+ * 默认从个人仓库检查更新. [serverUrls] 供端到端测试显式指定版本 API, 按顺序尝试.
  */
 class UpdateChecker(
-    private val serverUrls: List<String> = DEFAULT_SERVER_URLS,
+    private val serverUrls: List<String>? = null,
 ) {
     /**
      * 检查是否有更新的版本. 返回最新版本的信息, 或者 `null` 表示没有新版本.
@@ -43,10 +43,11 @@ class UpdateChecker(
         releaseClass: ReleaseClass,
         currentVersion: String = currentAniBuildConfig.versionName,
     ): NewVersion? {
-        require(serverUrls.isNotEmpty()) { "serverUrls must not be empty" }
+        require(serverUrls == null || serverUrls.isNotEmpty()) { "serverUrls must not be empty" }
         HttpClient(getPlatformKtorEngine()) {
             expectSuccess = true
         }.use { client ->
+            if (serverUrls == null) return PersonalReleaseUpdates.check(client, currentVersion)
             withExceptionCollector {
                 for (baseUrl in serverUrls) {
                     try {
@@ -118,10 +119,6 @@ class UpdateChecker(
     companion object {
         private val logger = logger<UpdateChecker>()
 
-        val DEFAULT_SERVER_URLS = listOf(
-            "https://danmaku-global.myani.org/",
-            "https://danmaku-cn.myani.org/",
-        )
         private val json = Json {
             ignoreUnknownKeys = true
         }

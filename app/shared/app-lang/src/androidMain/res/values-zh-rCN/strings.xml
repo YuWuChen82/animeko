@@ -1948,7 +1948,7 @@
     <string name="settings_mediasource_jsonapi_play_copy">复制</string>
 
     <string name="settings_player_track_memory">记住音轨和字幕</string>
-    <string name="settings_player_track_memory_description">按番剧记住手动选择；换集、重新进入后按语言与名称恢复，也会记住关闭字幕。</string>
+    <string name="settings_player_track_memory_description">按同一季番剧条目记住手动选择；换集、重新进入和重启后恢复，也会记住关闭字幕。</string>
     <string name="settings_player_track_memory_clear">清除轨道记忆</string>
     <string name="settings_player_shortcuts">键盘快捷键</string>
     <string name="settings_player_shortcut_unbound">未绑定</string>
@@ -1971,6 +1971,7 @@
     <string name="settings_player_shortcut_speed_1">切换到 1 倍速</string>
     <string name="settings_player_shortcut_speed_2">切换到 2 倍速</string>
     <string name="settings_player_shortcut_speed_3">切换到 3 倍速</string>
+    <string name="settings_update_personal_source">更新源：%1$s</string>
 </resources>
 
 <!--@formatter:on-->
