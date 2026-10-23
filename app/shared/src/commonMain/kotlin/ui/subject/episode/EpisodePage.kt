@@ -92,7 +92,6 @@ import me.him188.ani.app.pip.NoOpPictureInPictureController
 import me.him188.ani.app.pip.PictureInPictureController
 import me.him188.ani.app.pip.rememberPictureInPictureController
 import me.him188.ani.app.pip.shouldAutoEnterPictureInPicture
-import me.him188.ani.app.shared.Res as AppRes
 import me.him188.ani.app.platform.LocalContext
 import me.him188.ani.app.platform.features.StreamType
 import me.him188.ani.app.platform.features.getComponentAccessors
@@ -1067,8 +1066,8 @@ private fun EpisodeVideo(
     val context by rememberUpdatedState(LocalContext.current)
     val navigator = LocalNavigator.current
     val toaster = LocalToaster.current
-    val danmakuEnabledText = stringResource(AppRes.string.danmaku_toggle_enabled)
-    val danmakuDisabledText = stringResource(AppRes.string.danmaku_toggle_disabled)
+    val danmakuEnabledText = stringResource(Lang.danmaku_toggle_enabled)
+    val danmakuDisabledText = stringResource(Lang.danmaku_toggle_disabled)
 
     // 回到前台、进出全屏后都先隐藏控制器
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {

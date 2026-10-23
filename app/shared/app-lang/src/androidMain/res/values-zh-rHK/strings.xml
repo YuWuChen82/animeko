@@ -1938,6 +1938,8 @@
     <string name="settings_player_shortcut_speed_2">切換到 2 倍速</string>
     <string name="settings_player_shortcut_speed_3">切換到 3 倍速</string>
     <string name="settings_update_personal_source">更新來源：%1$s</string>
+    <string name="danmaku_toggle_enabled">彈幕已開啟</string>
+    <string name="danmaku_toggle_disabled">彈幕已關閉</string>
 </resources>
 
 <!--@formatter:on-->
