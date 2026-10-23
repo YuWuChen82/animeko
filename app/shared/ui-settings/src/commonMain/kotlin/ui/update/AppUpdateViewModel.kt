@@ -177,7 +177,10 @@ open class AppUpdateViewModel(
                 }
                 logger.info { "Checking latest version, updateSettings=${updateSettings}" }
 
-                updateChecker.checkLatestVersion(updateSettings.releaseClass).also {
+                updateChecker.checkLatestVersion(
+                    updateSettings.releaseClass,
+                    scopedHttpClient = clientProvider.get(),
+                ).also {
                     checkResultFlow.value = CheckResult(it, currentTimeMillis())
                 }
             } catch (e: CancellationException) {

@@ -11,6 +11,7 @@ package me.him188.ani.app.ui.update
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.expectSuccess
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
@@ -29,6 +30,7 @@ object PersonalReleaseUpdates {
     const val REPOSITORY = "YuWuChen82/animeko"
     const val RELEASES_URL = "https://github.com/$REPOSITORY/releases"
     const val PACKAGE_NAME = "Animeko-personal-windows-x64.zip"
+    private const val CHECK_TIMEOUT_MILLIS = 15_000L
 
     private val versionPattern = Regex("""^\d+\.\d+\.\d+-personal\.(\d+)\.(\d+)$""")
     private val json = Json { ignoreUnknownKeys = true }
@@ -43,6 +45,7 @@ object PersonalReleaseUpdates {
             expectSuccess = false
             header(HttpHeaders.Accept, "application/vnd.github+json")
             header("X-GitHub-Api-Version", "2022-11-28")
+            timeout { requestTimeoutMillis = CHECK_TIMEOUT_MILLIS }
         }
         if (response.status == HttpStatusCode.NotFound) return null
         check(response.status.isSuccess()) { "Personal release check failed: ${response.status}" }

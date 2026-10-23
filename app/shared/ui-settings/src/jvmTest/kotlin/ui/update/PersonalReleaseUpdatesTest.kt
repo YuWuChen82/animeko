@@ -16,6 +16,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
+import me.him188.ani.app.data.network.protocol.ReleaseClass
+import me.him188.ani.utils.ktor.asScopedHttpClient
 import me.him188.ani.utils.platform.Arch
 import me.him188.ani.utils.platform.Platform
 import kotlin.test.Test
@@ -64,6 +66,24 @@ class PersonalReleaseUpdatesTest {
         assertEquals(version, latest.name)
         assertEquals(listOf(baseUrl + PersonalReleaseUpdates.PACKAGE_NAME), latest.downloadUrlAlternatives)
         assertEquals("Personal features", latest.changelogs.single().changes)
+    }
+
+    @Test
+    fun `the app updater checks the personal release through its shared HTTP client`() = runTest {
+        val client = HttpClient(MockEngine {
+            assertEquals("https://api.github.com/repos/YuWuChen82/animeko/releases/latest", it.url.toString())
+            respond(release(), HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+        })
+        try {
+            val latest = UpdateChecker().checkLatestVersion(
+                releaseClass = ReleaseClass.STABLE,
+                currentVersion = "6.3.0-personal.41.1",
+                scopedHttpClient = client.asScopedHttpClient(),
+            )
+            assertEquals(version, latest?.name)
+        } finally {
+            client.close()
+        }
     }
 
     @Test

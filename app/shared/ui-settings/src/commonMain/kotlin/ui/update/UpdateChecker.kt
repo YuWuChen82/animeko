@@ -22,6 +22,7 @@ import me.him188.ani.app.data.network.protocol.ReleaseUpdatesDetailedResponse
 import me.him188.ani.app.platform.currentAniBuildConfig
 import me.him188.ani.app.tools.TimeFormatter
 import me.him188.ani.utils.coroutines.withExceptionCollector
+import me.him188.ani.utils.ktor.ScopedHttpClient
 import me.him188.ani.utils.ktor.getPlatformKtorEngine
 import me.him188.ani.utils.logging.error
 import me.him188.ani.utils.logging.info
@@ -42,8 +43,14 @@ class UpdateChecker(
     suspend fun checkLatestVersion(
         releaseClass: ReleaseClass,
         currentVersion: String = currentAniBuildConfig.versionName,
+        scopedHttpClient: ScopedHttpClient? = null,
     ): NewVersion? {
         require(serverUrls == null || serverUrls.isNotEmpty()) { "serverUrls must not be empty" }
+        if (serverUrls == null && scopedHttpClient != null) {
+            return scopedHttpClient.use {
+                PersonalReleaseUpdates.check(this, currentVersion)
+            }
+        }
         HttpClient(getPlatformKtorEngine()) {
             expectSuccess = true
         }.use { client ->
