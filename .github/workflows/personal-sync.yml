@@ -1,0 +1,141 @@
+name: Personal Windows build and upstream sync
+
+on:
+  push:
+    branches: [main, personal/**]
+  workflow_dispatch:
+  schedule:
+    - cron: '17 20 * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: personal-main
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    if: github.repository == 'YuWuChen82/animeko'
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      JAVA_TOOL_OPTIONS: -Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.WindowsSelectorProvider
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Prepare an upstream merge without publishing it
+        id: sync
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo 'publish_merge=false' >> "$GITHUB_OUTPUT"
+            echo 'build=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git fetch https://github.com/open-ani/animeko.git main
+          upstream=$(git rev-parse FETCH_HEAD)
+          if git merge-base --is-ancestor "$upstream" HEAD; then
+            echo 'publish_merge=false' >> "$GITHUB_OUTPUT"
+            if [ "$GITHUB_EVENT_NAME" = schedule ]; then
+              echo 'build=false' >> "$GITHUB_OUTPUT"
+            else
+              echo 'build=true' >> "$GITHUB_OUTPUT"
+            fi
+          else
+            if ! git merge --no-edit "$upstream"; then
+              git merge --abort
+              echo '::error::Upstream changes conflict with personal features. main was left unchanged; resolve the conflict manually.'
+              exit 1
+            fi
+            echo 'publish_merge=true' >> "$GITHUB_OUTPUT"
+            echo 'build=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install JBR 21 with JCEF and verify its checksum
+        if: steps.sync.outputs.build == 'true'
+        shell: pwsh
+        run: |
+          $url = 'https://cache-redirector.jetbrains.com/intellij-jbr/jbrsdk_jcef-21.0.11-windows-x64-b1163.116.tar.gz'
+          $archive = Join-Path $env:RUNNER_TEMP 'personal-jbr.tar.gz'
+          Invoke-WebRequest -Uri $url -OutFile $archive
+          $checksum = (Invoke-WebRequest -Uri "$url.checksum").Content
+          $expected = ($checksum.Trim() -split '\s+')[0].ToLowerInvariant()
+          if ((Get-FileHash -LiteralPath $archive -Algorithm SHA512).Hash.ToLowerInvariant() -ne $expected) {
+            throw 'JBR checksum mismatch'
+          }
+          $directory = Join-Path $env:RUNNER_TEMP 'personal-jbr'
+          New-Item -ItemType Directory -Path $directory -Force | Out-Null
+          tar -xzf $archive -C $directory
+          if ($LASTEXITCODE -ne 0) { throw 'JBR extraction failed' }
+          $javaHome = (Get-ChildItem -LiteralPath $directory -Directory | Where-Object {
+            Test-Path -LiteralPath (Join-Path $_.FullName 'bin\java.exe')
+          } | Select-Object -First 1).FullName
+          if (-not $javaHome) { throw 'JBR installation was not found' }
+          "JAVA_HOME=$javaHome" >> $env:GITHUB_ENV
+          (Join-Path $javaHome 'bin') >> $env:GITHUB_PATH
+
+      - uses: android-actions/setup-android@v3
+        if: steps.sync.outputs.build == 'true'
+      - name: Install Android platform required by the build
+        if: steps.sync.outputs.build == 'true'
+        shell: pwsh
+        run: |
+          $sdk = (Select-String -LiteralPath gradle.properties -Pattern '^android.compile.sdk=(\d+)$').Matches.Groups[1].Value
+          sdkmanager "platforms;android-$sdk"
+          if ($LASTEXITCODE -ne 0) { throw 'Android platform installation failed' }
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.sync.outputs.build == 'true'
+
+      - name: Run player and settings regression tests
+        if: steps.sync.outputs.build == 'true'
+        shell: pwsh
+        run: |
+          .\gradlew.bat :app:shared:app-data:desktopTest :app:shared:video-player:desktopTest :app:shared:ui-settings:desktopTest --console=plain --no-configuration-cache
+          if ($LASTEXITCODE -ne 0) { throw 'Regression tests failed; upstream merge was not published' }
+
+      - name: Package Windows personal edition
+        if: steps.sync.outputs.build == 'true'
+        shell: pwsh
+        run: |
+          $sha = git rev-parse --short HEAD
+          .\gradlew.bat :app:desktop:createReleaseDistributable "-Pversion.name=personal-$sha" --console=plain --no-configuration-cache
+          if ($LASTEXITCODE -ne 0) { throw 'Packaging failed; upstream merge was not published' }
+
+      - name: Publish a tested upstream merge
+        if: steps.sync.outputs.publish_merge == 'true'
+        shell: bash
+        run: git push origin HEAD:main
+
+      - name: Archive the portable application
+        if: steps.sync.outputs.build == 'true'
+        shell: pwsh
+        run: |
+          $app = Get-ChildItem -LiteralPath 'app/desktop/build/compose/binaries/main-release/app' -Directory | Select-Object -First 1
+          if (-not $app) { throw 'Packaged application was not found' }
+          Compress-Archive -LiteralPath $app.FullName -DestinationPath 'Animeko-personal-windows-x64.zip'
+
+      - uses: actions/upload-artifact@v4
+        if: steps.sync.outputs.build == 'true'
+        with:
+          name: Animeko-personal-windows-x64
+          path: Animeko-personal-windows-x64.zip
+          retention-days: 14
+
+      - name: Publish a personal prerelease
+        if: steps.sync.outputs.build == 'true' && github.ref == 'refs/heads/main'
+        shell: pwsh
+        run: |
+          $sha = git rev-parse HEAD
+          $short = git rev-parse --short HEAD
+          $tag = 'personal-' + (Get-Date -AsUTC -Format 'yyyyMMdd-HHmmss') + '-' + $short
+          gh release create $tag Animeko-personal-windows-x64.zip --repo $env:GITHUB_REPOSITORY --target $sha --prerelease --title "Personal Windows $short" --notes 'Personal edition with configurable shortcuts and per-anime audio/subtitle memory. Upstream changes are merged only after tests and packaging succeed. Existing incorrect cache mappings are not migrated by this build.'
+          if ($LASTEXITCODE -ne 0) { throw 'Personal release publishing failed' }

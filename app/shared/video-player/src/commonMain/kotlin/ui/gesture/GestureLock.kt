@@ -9,6 +9,8 @@
 
 package me.him188.ani.app.videoplayer.ui.gesture
 
+import me.him188.ani.app.data.models.preference.PlayerShortcutConfig
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -155,6 +157,7 @@ fun LockableVideoGestureHost(
         LocalPlatform.current.mouseFamily,
     ),
     gestureIndicatorState: GestureIndicatorState = rememberGestureIndicatorState(),
+    keyboardShortcuts: PlayerShortcutConfig = PlayerShortcutConfig.Default,
     fastForwardSpeed: Float = 3f,
     fastSkipState: FastSkipState? = playerState.features[PlaybackSpeed]?.let {
         rememberPlayerFastSkipState(
@@ -187,6 +190,7 @@ fun LockableVideoGestureHost(
             onTogglePauseResume = onTogglePauseResume,
             onToggleDanmaku = onToggleDanmaku,
             onTogglePlayerStats = onTogglePlayerStats,
+            keyboardShortcuts = keyboardShortcuts,
             family = family,
         )
     }

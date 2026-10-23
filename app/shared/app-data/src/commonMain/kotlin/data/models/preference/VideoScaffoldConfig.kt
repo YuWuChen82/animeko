@@ -219,6 +219,12 @@ data class VideoScaffoldConfig @SerializationOnly constructor(
      * @since 5.0
      */
     val backgroundBehavior: BackgroundBehavior = BackgroundBehavior.AUTO_PICTURE_IN_PICTURE,
+    /** User-selected player commands, persisted using portable logical key names. */
+    val keyboardShortcuts: PlayerShortcutConfig = PlayerShortcutConfig.Default,
+    /** Explicit audio and subtitle choices apply to subsequent media in the same subject. */
+    val rememberTrackSelection: Boolean = true,
+    /** Recently customized subjects, bounded to 128 entries when recording a choice. */
+    val trackPreferences: Map<String, SubjectTrackPreferences> = emptyMap(),
     // WARNING: if you add new property here, review Companion properties.
     @Suppress("PropertyName") @Transient val _placeholder: Int = 0,
 ) {
@@ -311,6 +317,7 @@ data class VideoScaffoldConfig @SerializationOnly constructor(
             enableHighQualityAudioTimeStretch = false,
             hlsAdFilteringMode = HlsAdFilteringMode.OFF,
             backgroundBehavior = BackgroundBehavior.PAUSE,
+            rememberTrackSelection = false,
         )
     }
 

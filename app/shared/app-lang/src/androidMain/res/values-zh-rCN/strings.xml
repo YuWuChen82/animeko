@@ -1946,6 +1946,31 @@
     <string name="settings_mediasource_jsonapi_unknown_variables">未知变量：%1$s</string>
     <string name="settings_mediasource_jsonapi_play_open_video">打开视频地址</string>
     <string name="settings_mediasource_jsonapi_play_copy">复制</string>
+
+    <string name="settings_player_track_memory">记住音轨和字幕</string>
+    <string name="settings_player_track_memory_description">按番剧记住手动选择；换集、重新进入后按语言与名称恢复，也会记住关闭字幕。</string>
+    <string name="settings_player_track_memory_clear">清除轨道记忆</string>
+    <string name="settings_player_shortcuts">键盘快捷键</string>
+    <string name="settings_player_shortcut_unbound">未绑定</string>
+    <string name="settings_player_shortcuts_reset">恢复默认快捷键</string>
+    <string name="settings_player_shortcut_conflict">按键已被占用</string>
+    <string name="settings_player_shortcut_swap_description">%1$s 已绑定到「%2$s」，是否交换两个操作的按键？</string>
+    <string name="settings_player_shortcut_swap">交换按键</string>
+    <string name="settings_player_shortcut_cancel">取消</string>
+    <string name="settings_player_shortcut_pause">暂停 / 继续</string>
+    <string name="settings_player_shortcut_fullscreen">全屏开关</string>
+    <string name="settings_player_shortcut_danmaku">弹幕开关</string>
+    <string name="settings_player_shortcut_stats">播放统计开关</string>
+    <string name="settings_player_shortcut_backward">快退</string>
+    <string name="settings_player_shortcut_forward">快进</string>
+    <string name="settings_player_shortcut_volume_up">提高音量</string>
+    <string name="settings_player_shortcut_volume_down">降低音量</string>
+    <string name="settings_player_shortcut_speed_down">降低倍速</string>
+    <string name="settings_player_shortcut_speed_up">提高倍速</string>
+    <string name="settings_player_shortcut_speed_reset">恢复正常倍速</string>
+    <string name="settings_player_shortcut_speed_1">切换到 1 倍速</string>
+    <string name="settings_player_shortcut_speed_2">切换到 2 倍速</string>
+    <string name="settings_player_shortcut_speed_3">切换到 3 倍速</string>
 </resources>
 
 <!--@formatter:on-->

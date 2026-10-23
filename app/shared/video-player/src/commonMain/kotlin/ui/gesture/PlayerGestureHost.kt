@@ -9,6 +9,8 @@
 
 package me.him188.ani.app.videoplayer.ui.gesture
 
+import me.him188.ani.app.data.models.preference.PlayerShortcutConfig
+
 import androidx.annotation.UiThread
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -589,6 +591,7 @@ fun PlayerGestureHost(
     onTogglePauseResume: () -> Unit = {},
     onToggleDanmaku: () -> Unit = {},
     onTogglePlayerStats: () -> Unit = {},
+    keyboardShortcuts: PlayerShortcutConfig = PlayerShortcutConfig.Default,
 ) {
     val onTogglePauseResumeState by rememberUpdatedState(onTogglePauseResume)
     val isFullscreen = fullscreenState.isFullscreen
@@ -673,6 +676,7 @@ fun PlayerGestureHost(
             onToggleFullscreen = remember(fullscreenState) { { fullscreenState.toggle() } },
             onToggleDanmaku = onToggleDanmaku,
             onTogglePlayerStats = onTogglePlayerStats,
+            shortcuts = keyboardShortcuts,
         )
         DisposableEffect(controllerState, keyboardHandler) {
             controllerState.keyboard.register(keyboardHandler)

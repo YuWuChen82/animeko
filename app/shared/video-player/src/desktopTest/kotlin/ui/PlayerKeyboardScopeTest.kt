@@ -48,6 +48,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import me.him188.ani.app.data.models.preference.PlayerShortcutAction
+import me.him188.ani.app.data.models.preference.PlayerShortcutConfig
 import me.him188.ani.app.navigation.AniNavigator
 import me.him188.ani.app.navigation.MainScreenPage
 import me.him188.ani.app.navigation.NavRoutes
@@ -83,6 +85,7 @@ class PlayerKeyboardScopeTest {
         val handlerVisible = mutableStateOf(true)
         val text = mutableStateOf(TextFieldValue("abc", TextRange(3)))
         val speed = mutableStateOf(1f)
+        val shortcuts = mutableStateOf(PlayerShortcutConfig.Default)
         val seeks = mutableListOf<Int>()
         val volume = mutableListOf<Boolean>()
         var pauses = 0
@@ -101,6 +104,7 @@ class PlayerKeyboardScopeTest {
                 seeker, fastSkip, speed.value, 0.5f..3f, { speed.value = it },
                 true, { volume += it }, { volume += it },
                 { pauses++ }, { fullscreen++ }, { danmaku++ }, { stats++ },
+                shortcuts = shortcuts.value,
             )
             DisposableEffect(handler) {
                 controller.keyboard.register(handler)
@@ -189,6 +193,28 @@ class PlayerKeyboardScopeTest {
         assertEquals(listOf(false), fixture.volume)
         press(tag, Key.Spacebar)
         assertEquals(2, fixture.pauses)
+    }
+
+    @Test
+    fun `custom danmaku key toggles danmaku while the exchanged key changes speed`() = runScopeTest { fixture ->
+        fixture.shortcuts.value = PlayerShortcutConfig.Default.bind(PlayerShortcutAction.TOGGLE_DANMAKU, "D", swap = true)
+        waitForIdle()
+        press("player", Key.D)
+        assertEquals(1, fixture.danmaku)
+        assertEquals(1f, fixture.speed.value)
+        press("player", Key.B)
+        assertEquals(1.25f, fixture.speed.value)
+        assertEquals(1, fixture.danmaku)
+    }
+
+    @Test
+    fun `custom danmaku binding is suppressed during text input`() = runScopeTest { fixture ->
+        fixture.shortcuts.value = PlayerShortcutConfig.Default.bind(PlayerShortcutAction.TOGGLE_DANMAKU, "D", swap = true)
+        onNodeWithTag("field").requestFocus()
+        waitForIdle()
+        press("field", Key.D)
+        assertEquals(0, fixture.danmaku)
+        assertEquals(1f, fixture.speed.value)
     }
 
     @Test

@@ -1332,6 +1332,9 @@ private fun EpisodeVideo(
         contentWindowInsets = windowInsets,
         enableFoldableHoverMode = vm.videoScaffoldConfig.enableFoldableHoverMode,
         fastForwardSpeed = vm.videoScaffoldConfig.fastForwardSpeed,
+        keyboardShortcuts = vm.videoScaffoldConfig.keyboardShortcuts,
+        onSelectAudioTrack = vm.trackMemory::selectAudio,
+        onSelectSubtitleTrack = vm.trackMemory::selectSubtitle,
         pictureInPictureController = pictureInPictureController,
         isInPictureInPicture = isInPictureInPicture,
     )

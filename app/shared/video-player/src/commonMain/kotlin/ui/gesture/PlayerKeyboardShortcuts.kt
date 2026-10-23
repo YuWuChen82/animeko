@@ -18,18 +18,11 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
-import me.him188.ani.app.ui.foundation.effects.ComposeKey
+import me.him188.ani.app.data.models.preference.PlayerShortcutAction
+import me.him188.ani.app.data.models.preference.PlayerShortcutConfig
+import me.him188.ani.app.ui.foundation.effects.PlayerShortcutKeys
 import me.him188.ani.app.videoplayer.ui.PlayerKeyboardHandler
 import me.him188.ani.app.videoplayer.ui.nextPlaybackSpeed
-
-private val PLAYBACK_SPEED_SHORTCUTS = listOf(
-    ComposeKey.One to 1f,
-    ComposeKey.NumPad1 to 1f,
-    ComposeKey.Two to 2f,
-    ComposeKey.NumPad2 to 2f,
-    ComposeKey.Three to 3f,
-    ComposeKey.NumPad3 to 3f,
-)
 
 /** Builds the playback commands dispatched by the player's keyboard scope. */
 @Composable
@@ -46,53 +39,58 @@ internal fun rememberPlayerKeyboardShortcuts(
     onToggleFullscreen: () -> Unit,
     onToggleDanmaku: () -> Unit,
     onTogglePlayerStats: () -> Unit,
+    shortcuts: PlayerShortcutConfig = PlayerShortcutConfig.Default,
 ): PlayerKeyboardHandler {
     val seekHandler = rememberKeyboardSeekHandler(
         onSeekBackward = { seekerState.onSeek(-5) },
         onSeekForward = { seekerState.onSeek(5) },
         fastSkipState = fastSkipState,
+        shortcuts = shortcuts,
     )
-    val volumeCommands by rememberUpdatedState<(KeyEvent) -> Boolean> volume@{ event ->
-        if (!volumeEnabled) return@volume false
-        when (event.key) {
-            ComposeKey.DirectionUp -> {
-                if (event.type == KeyEventType.KeyDown) onVolumeUp(event.isShiftPressed)
+    val commands by rememberUpdatedState<(KeyEvent) -> Boolean> command@{ event ->
+        val name = PlayerShortcutKeys.nameOf(event.key) ?: return@command false
+        val action = PlayerShortcutAction.entries.firstOrNull { shortcuts.key(it) == name }
+            ?: return@command false
+        when (action) {
+            PlayerShortcutAction.VOLUME_UP, PlayerShortcutAction.VOLUME_DOWN -> {
+                if (!volumeEnabled) return@command false
+                if (event.type == KeyEventType.KeyDown) {
+                    if (action == PlayerShortcutAction.VOLUME_UP) onVolumeUp(event.isShiftPressed)
+                    else onVolumeDown(event.isShiftPressed)
+                }
                 true
             }
-            ComposeKey.DirectionDown -> {
-                if (event.type == KeyEventType.KeyDown) onVolumeDown(event.isShiftPressed)
+            PlayerShortcutAction.SEEK_BACKWARD, PlayerShortcutAction.SEEK_FORWARD -> false
+            else -> {
+                val callback = when (action) {
+                    PlayerShortcutAction.TOGGLE_PAUSE -> onTogglePauseResume
+                    PlayerShortcutAction.TOGGLE_FULLSCREEN -> onToggleFullscreen
+                    PlayerShortcutAction.TOGGLE_DANMAKU -> onToggleDanmaku
+                    PlayerShortcutAction.TOGGLE_STATS -> onTogglePlayerStats
+                    else -> null
+                }
+                if (callback != null) {
+                    if (event.type == KeyEventType.KeyUp) callback()
+                    return@command true
+                }
+                if (currentPlaybackSpeed == null) return@command false
+                val speed = when (action) {
+                    PlayerShortcutAction.SPEED_DOWN -> nextPlaybackSpeed(currentPlaybackSpeed, playbackSpeedRange, -1)
+                    PlayerShortcutAction.SPEED_UP -> nextPlaybackSpeed(currentPlaybackSpeed, playbackSpeedRange, 1)
+                    PlayerShortcutAction.SPEED_RESET, PlayerShortcutAction.SPEED_1 -> 1f
+                    PlayerShortcutAction.SPEED_2 -> 2f
+                    PlayerShortcutAction.SPEED_3 -> 3f
+                    else -> return@command false
+                }
+                if (event.type == KeyEventType.KeyUp) onPlaybackSpeedChanged(speed.coerceIn(playbackSpeedRange))
                 true
             }
-            else -> false
         }
-    }
-    val releaseCommands by rememberUpdatedState<(KeyEvent) -> Boolean> release@{ event ->
-        val action = when (event.key) {
-            ComposeKey.Spacebar -> onTogglePauseResume
-            ComposeKey.F -> onToggleFullscreen
-            ComposeKey.B -> onToggleDanmaku
-            ComposeKey.I -> onTogglePlayerStats
-            else -> null
-        }
-        if (action != null) {
-            if (event.type == KeyEventType.KeyUp) action()
-            return@release true
-        }
-        if (currentPlaybackSpeed == null) return@release false
-        val speed = when (event.key) {
-            ComposeKey.A -> nextPlaybackSpeed(currentPlaybackSpeed, playbackSpeedRange, -1)
-            ComposeKey.D -> nextPlaybackSpeed(currentPlaybackSpeed, playbackSpeedRange, 1)
-            ComposeKey.S -> 1f.coerceIn(playbackSpeedRange)
-            else -> PLAYBACK_SPEED_SHORTCUTS.firstOrNull { it.first == event.key }?.second
-                ?.coerceIn(playbackSpeedRange) ?: return@release false
-        }
-        if (event.type == KeyEventType.KeyUp) onPlaybackSpeedChanged(speed)
-        true
     }
     return remember(seekHandler) {
         object : PlayerKeyboardHandler {
             override fun invoke(event: KeyEvent): Boolean =
-                seekHandler(event) || volumeCommands(event) || releaseCommands(event)
+                seekHandler(event) || commands(event)
             override fun cancel() = seekHandler.cancel()
         }
     }

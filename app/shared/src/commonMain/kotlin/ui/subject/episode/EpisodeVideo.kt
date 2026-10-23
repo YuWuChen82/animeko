@@ -89,6 +89,9 @@ import me.him188.ani.app.ui.foundation.icons.Forward85
 import me.him188.ani.app.ui.foundation.icons.Forward90
 import me.him188.ani.app.ui.foundation.icons.RightPanelClose
 import me.him188.ani.app.ui.foundation.icons.RightPanelOpen
+import me.him188.ani.app.data.models.preference.PlayerShortcutConfig
+import org.openani.mediamp.metadata.AudioTrack
+import org.openani.mediamp.metadata.SubtitleTrack
 import me.him188.ani.app.ui.foundation.icons.SubtitleGear
 import me.him188.ani.app.ui.foundation.ifThen
 import me.him188.ani.app.ui.foundation.input.LocalActiveInputSource
@@ -261,6 +264,9 @@ internal fun EpisodeVideoImpl(
     contentWindowInsets: WindowInsets = WindowInsets(0.dp),
     pictureInPictureController: PictureInPictureController = NoOpPictureInPictureController,
     isInPictureInPicture: Boolean = false,
+    keyboardShortcuts: PlayerShortcutConfig = PlayerShortcutConfig.Default,
+    onSelectAudioTrack: ((AudioTrack?) -> Unit)? = null,
+    onSelectSubtitleTrack: ((SubtitleTrack?) -> Unit)? = null,
 ) {
     // Don't rememberSavable. 页面重建后都回到默认状态
     // 锁定按钮只在 expanded 时显示, 离开 expanded 时必须解锁, 否则无法再解除
@@ -432,6 +438,7 @@ internal fun EpisodeVideoImpl(
                     family = gestureFamily,
                     indicatorState,
                     fastForwardSpeed = fastForwardSpeed,
+                    keyboardShortcuts = keyboardShortcuts,
                 )
             },
             playerStatsOverlay = {
@@ -591,12 +598,12 @@ internal fun EpisodeVideoImpl(
 
                             if (LocalPlatform.current.isDesktop()) {
                                 playerState.audioTracks?.let {
-                                    PlayerControllerDefaults.AudioSwitcher(it)
+                                    PlayerControllerDefaults.AudioSwitcher(it, onSelect = onSelectAudioTrack ?: { track -> it.select(track) })
                                 }
                             }
 
                             playerState.subtitleTracks?.let {
-                                PlayerControllerDefaults.SubtitleSwitcher(it)
+                                PlayerControllerDefaults.SubtitleSwitcher(it, onSelect = onSelectSubtitleTrack ?: { track -> it.select(track) })
                             }
 
                             val playbackSpeedAlwaysOnRequester =

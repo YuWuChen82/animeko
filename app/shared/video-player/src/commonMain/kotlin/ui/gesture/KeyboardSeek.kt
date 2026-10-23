@@ -18,6 +18,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -29,6 +30,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.him188.ani.app.data.models.preference.PlayerShortcutAction
+import me.him188.ani.app.data.models.preference.PlayerShortcutConfig
+import me.him188.ani.app.ui.foundation.effects.PlayerShortcutKeys
 import me.him188.ani.app.ui.foundation.effects.ComposeKey
 import me.him188.ani.app.ui.foundation.effects.onKey
 import me.him188.ani.app.videoplayer.ui.PlayerKeyboardHandler
@@ -90,13 +94,23 @@ internal fun rememberKeyboardSeekHandler(
     onSeekBackward: () -> Unit,
     onSeekForward: () -> Unit,
     fastSkipState: FastSkipState?,
+    shortcuts: PlayerShortcutConfig = PlayerShortcutConfig.Default,
 ): PlayerKeyboardHandler {
     val layoutDirection = LocalLayoutDirection.current
     val onBackwardState by rememberUpdatedState(onSeekBackward)
     val onForwardState by rememberUpdatedState(onSeekForward)
     val scope = rememberCoroutineScope()
-    val handler = remember(layoutDirection, fastSkipState, scope) {
-        KeyboardSeekHandler(scope, layoutDirection, fastSkipState, { onBackwardState() }, { onForwardState() })
+    val handler = remember(layoutDirection, fastSkipState, scope, shortcuts) {
+        fun resolve(action: PlayerShortcutAction): Key? {
+            val key = PlayerShortcutKeys.keyOf(shortcuts.key(action))
+            return if (layoutDirection == LayoutDirection.Rtl) when (key) {
+                ComposeKey.DirectionLeft -> ComposeKey.DirectionRight
+                ComposeKey.DirectionRight -> ComposeKey.DirectionLeft
+                else -> key
+            } else key
+        }
+        KeyboardSeekHandler(scope, resolve(PlayerShortcutAction.SEEK_BACKWARD), resolve(PlayerShortcutAction.SEEK_FORWARD),
+            fastSkipState, { onBackwardState() }, { onForwardState() })
     }
     DisposableEffect(handler) {
         onDispose { handler.cancel() }
@@ -106,28 +120,19 @@ internal fun rememberKeyboardSeekHandler(
 
 private class KeyboardSeekHandler(
     private val scope: CoroutineScope,
-    layoutDirection: LayoutDirection,
+    private val backwardKey: Key?,
+    private val forwardKey: Key?,
     private val fastSkipState: FastSkipState?,
     private val onBackward: () -> Unit,
     private val onForward: () -> Unit,
 ) : PlayerKeyboardHandler {
-    private val backwardKey = if (layoutDirection == LayoutDirection.Ltr) {
-        ComposeKey.DirectionLeft
-    } else {
-        ComposeKey.DirectionRight
-    }
-    private val forwardKey = if (layoutDirection == LayoutDirection.Ltr) {
-        ComposeKey.DirectionRight
-    } else {
-        ComposeKey.DirectionLeft
-    }
     private var backwardPressed = false
     private var forwardPressed = false
     private var job: Job? = null
     private var ticket: Int? = null
 
     override fun invoke(event: KeyEvent): Boolean {
-        if (event.key == backwardKey) {
+        if (backwardKey != null && PlayerShortcutKeys.nameOf(event.key) == PlayerShortcutKeys.nameOf(backwardKey)) {
             if (event.type == KeyEventType.KeyDown) {
                 backwardPressed = true
                 return true
@@ -138,7 +143,7 @@ private class KeyboardSeekHandler(
                 return true
             }
         }
-        if (event.key == forwardKey) {
+        if (forwardKey != null && PlayerShortcutKeys.nameOf(event.key) == PlayerShortcutKeys.nameOf(forwardKey)) {
             if (event.type == KeyEventType.KeyDown) {
                 if (!forwardPressed) {
                     forwardPressed = true

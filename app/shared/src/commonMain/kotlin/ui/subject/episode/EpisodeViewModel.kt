@@ -110,6 +110,7 @@ import me.him188.ani.app.domain.media.resolver.MediaResolver
 import me.him188.ani.app.domain.mediasource.GetPreferredWebMediaSourceUseCase
 import me.him188.ani.app.domain.mediasource.instance.GetMediaSourceInstancesUseCase
 import me.him188.ani.app.domain.mediasource.web.captcha.WebSessionManager
+import me.him188.ani.app.domain.player.PlayerTrackMemory
 import me.him188.ani.app.domain.player.CacheProgressProvider
 import me.him188.ani.app.domain.media.selector.SelectTrigger
 import me.him188.ani.app.domain.player.analytics.PlayFlowEpisode
@@ -358,6 +359,8 @@ open class EpisodeViewModel(
             // datastore 读取很快, 可以接受这里的 blocking coroutine
             runBlocking { applyCustomOptions() }
         }
+
+    val trackMemory = PlayerTrackMemory(subjectId, player, settingsRepository.videoScaffoldConfig, backgroundScope)
 
     val videoEnhancement = createVideoEnhancementController(
         player,
