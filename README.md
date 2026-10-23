@@ -45,14 +45,7 @@ Animeko 支持云同步观看记录 ([Bangumi][Bangumi])、多视频数据源、
 
 ### 与官方版的区别
 
-个人版以 [open-ani/animeko](https://github.com/open-ani/animeko) 为上游，额外维护以下功能；上游同步后会运行验证并只构建 Windows x64。下表对比当前个人版所基于的官方代码，随上游更新可能变化：
-
-| 项目 | YuWuChen82 个人版 | 官方版 |
-| --- | --- | --- |
-| 播放器快捷键 | 在「应用与界面 → 播放器快捷键」点击操作右侧的按键框后直接录入，也可恢复默认 | 使用官方默认快捷键 |
-| 音轨和字幕 | 按番剧条目（通常对应一季）记忆选择，并跨集恢复 | 使用官方默认轨道行为 |
-| 应用更新 | 从本仓库 Releases 检查和下载 | 从官方发布渠道获取 |
-| 发布平台 | Windows x64 | Android、iOS、Windows、macOS、Linux |
+个人版基于 [open-ani/animeko](https://github.com/open-ani/animeko)，并维护了与官方版的功能差异及个人版更新机制说明：[个人版额外功能](PERSONAL_FEATURES.md)。文档描述以当前代码为准，随着上游同步可能变化。
 
 
 [立即下载](https://animeko.org/)
