@@ -31,6 +31,7 @@ main 收到个人修改时同样触发 Windows 构建和打包。
 已有音轨、字幕偏好需在个人版中选择一次；同一季的所有集共享设置，不同番剧条目互不影响。
 
 此工作流不需要个人访问令牌，使用仅对当前仓库有效的 `GITHUB_TOKEN`。
-个人构建不包含官方私有服务密钥；需要第三方服务密钥的功能受上游构建文档所列限制。
+弹弹 Play 使用 GitHub Actions Secrets 中的 `DANDANPLAY_APP_ID` 和 `DANDANPLAY_APP_SECRET`；未设置时工作流会在构建前停止。
+个人构建不包含官方私有服务密钥；其他需要第三方服务密钥的功能受上游构建文档所列限制。
 
 本 Fork 仅构建 Windows x64。个人工作流会禁用继承的其他 GitHub Actions 工作流，保留官方源码，避免触发 Android、macOS 和 Linux 构建。

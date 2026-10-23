@@ -1,8 +1,6 @@
 # YuWuChen82 个人版额外功能
 
-本页记录 YuWuChen82 个人版相对 [open-ani/animeko 官方版](https://github.com/open-ani/animeko) 额外维护的功能和发布方式。具体差异会随上游更新而变化；请以当前个人版代码和实际发布为准。
-
-个人版目前发布 Windows x64 版本：[下载最新版本](https://github.com/YuWuChen82/animeko/releases/latest)。Android、iOS、macOS、Linux 等平台请使用官方版本。
+本页仅列出 YuWuChen82 个人版相对 [open-ani/animeko 官方版](https://github.com/open-ani/animeko) 的功能差异。具体差异会随上游更新而变化；请以当前个人版代码和实际发布为准。
 
 ## 播放器快捷键
 
@@ -29,9 +27,3 @@
 ## 个人版应用内更新
 
 个人版应用内检查和下载更新时使用 [YuWuChen82/animeko Releases](https://github.com/YuWuChen82/animeko/releases)，不会检查官方版发布源。当前这个更新渠道提供 Windows x64 个人版。
-
-## 自动同步和发布
-
-[GitHub Actions 工作流](.github/workflows/personal-sync.yml)每天北京时间 04:17 检查官方仓库更新。发现上游变化后，工作流会同步并运行播放器、设置和 Windows 更新回归检查，再构建 Windows x64 安装包并发布到个人仓库 Releases。失败的验证不会发布该次更新。提交到个人仓库 `main` 分支也会触发 Windows 构建和发布流程。
-
-构建会使用弹弹 Play 开发者中心为本应用分配的 `DANDANPLAY_APP_ID` 与 `DANDANPLAY_APP_SECRET`，通过 GitHub Actions Secrets 注入；缺少凭据时会停止发布，避免生成弹幕功能不可用的版本。不要复用或公开其他应用的密钥。
