@@ -34,6 +34,16 @@ Animeko 支持云同步观看记录 ([Bangumi][Bangumi])、多视频数据源、
 
 > Animeko 曾用名 Ani，现在也简称 Ani。
 
+## YuWuChen82 个人版（Windows）
+
+本仓库是基于 [open-ani/animeko](https://github.com/open-ani/animeko) 的个人 Fork，当前提供 Windows x64 版本。
+
+- [下载最新个人版](https://github.com/YuWuChen82/animeko/releases/latest)
+- 播放器支持自定义快捷键。
+- 音轨和字幕按番剧条目（通常对应一季）记忆，切换集数后继续沿用。
+- 应用内更新源指向本仓库；GitHub Actions 每天北京时间 04:17 检查并同步官方更新，通过构建后发布 Windows 个人版。
+
+
 [立即下载](https://animeko.org/)
 
 https://github.com/user-attachments/assets/e63636c9-30b7-411c-aa6b-e5b78b900726
@@ -104,6 +114,12 @@ https://github.com/user-attachments/assets/e63636c9-30b7-411c-aa6b-e5b78b900726
 |:--------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|
 
 ## 下载
+
+### YuWuChen82 个人版（Windows）
+
+[下载最新 Windows x64 个人版](https://github.com/YuWuChen82/animeko/releases/latest)。应用更新也从本仓库的 Releases 获取。
+
+### 官方版本
 
 Animeko 支持所有主流平台：Android、iOS、Windows、macOS、Linux。
 
