@@ -87,7 +87,9 @@ class PlayerTrackMemoryTest {
     @Test
     fun `subtitle off survives reopening but does not affect another subject`() = runTest {
         val settings = MemorySettings()
-        Fixture(this, settings).memory.selectSubtitle(null)
+        val first = Fixture(this, settings)
+        first.memory.selectSubtitle(null)
+        first.base.close()
         val next = Fixture(this, settings)
         val subtitle = SubtitleTrack("2", "2", "zh-Hans", emptyList())
         next.subtitles.candidates.value = listOf(subtitle)

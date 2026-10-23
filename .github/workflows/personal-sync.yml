@@ -66,7 +66,9 @@ jobs:
           $url = 'https://cache-redirector.jetbrains.com/intellij-jbr/jbrsdk_jcef-21.0.11-windows-x64-b1163.116.tar.gz'
           $archive = Join-Path $env:RUNNER_TEMP 'personal-jbr.tar.gz'
           Invoke-WebRequest -Uri $url -OutFile $archive
-          $checksum = (Invoke-WebRequest -Uri "$url.checksum").Content
+          $checksumFile = Join-Path $env:RUNNER_TEMP 'personal-jbr.checksum'
+          Invoke-WebRequest -Uri "$url.checksum" -OutFile $checksumFile
+          $checksum = Get-Content -LiteralPath $checksumFile -Raw
           $expected = ($checksum.Trim() -split '\s+')[0].ToLowerInvariant()
           if ((Get-FileHash -LiteralPath $archive -Algorithm SHA512).Hash.ToLowerInvariant() -ne $expected) {
             throw 'JBR checksum mismatch'
