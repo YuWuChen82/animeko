@@ -598,12 +598,12 @@ internal fun EpisodeVideoImpl(
 
                             if (LocalPlatform.current.isDesktop()) {
                                 playerState.audioTracks?.let {
-                                    PlayerControllerDefaults.AudioSwitcher(it, onSelect = onSelectAudioTrack ?: { track -> it.select(track) })
+                                    PlayerControllerDefaults.AudioSwitcher(it, onSelect = onSelectAudioTrack ?: { track -> it.select(track); Unit })
                                 }
                             }
 
                             playerState.subtitleTracks?.let {
-                                PlayerControllerDefaults.SubtitleSwitcher(it, onSelect = onSelectSubtitleTrack ?: { track -> it.select(track) })
+                                PlayerControllerDefaults.SubtitleSwitcher(it, onSelect = onSelectSubtitleTrack ?: { track -> it.select(track); Unit })
                             }
 
                             val playbackSpeedAlwaysOnRequester =
