@@ -46,6 +46,7 @@
     <string name="settings_debug_mode_enabled">Debug mode enabled</string>
     <string name="settings_tab_appearance">Appearance</string>
     <string name="settings_tab_theme">Theme &amp; Colors</string>
+    <string name="settings_tab_player_shortcuts">Player shortcuts</string>
     <string name="settings_tab_player">Player &amp; Danmaku Filter</string>
     <string name="settings_tab_media_source">Data Source Management</string>
     <string name="settings_tab_media_selector">Viewing Preferences</string>
@@ -1911,6 +1912,8 @@
     <string name="settings_player_track_memory_description">Remember choices for the same anime season (subject). Restore language and name across episodes and app restarts, including disabled subtitles.</string>
     <string name="settings_player_track_memory_clear">Clear remembered tracks</string>
     <string name="settings_player_shortcuts">Keyboard shortcuts</string>
+    <string name="settings_player_shortcut_press_key">Press a key…</string>
+    <string name="settings_player_shortcut_capture_hint">Click a key binding, then press a supported key (letter, number, arrow, Space, or F1–F12). Esc cancels; Backspace or Delete clears it. Modifier combinations are not supported.</string>
     <string name="settings_player_shortcut_unbound">Unassigned</string>
     <string name="settings_player_shortcuts_reset">Restore default shortcuts</string>
     <string name="settings_player_shortcut_conflict">Key already assigned</string>

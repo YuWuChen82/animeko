@@ -36,6 +36,7 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Keyboard
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.Science
@@ -146,6 +147,7 @@ import me.him188.ani.app.ui.lang.settings_tab_log
 import me.him188.ani.app.ui.lang.settings_tab_media_selector
 import me.him188.ani.app.ui.lang.settings_tab_media_source
 import me.him188.ani.app.ui.lang.settings_tab_player
+import me.him188.ani.app.ui.lang.settings_tab_player_shortcuts
 import me.him188.ani.app.ui.lang.settings_tab_proxy
 import me.him188.ani.app.ui.lang.settings_tab_settings_backup
 import me.him188.ani.app.ui.lang.settings_tab_storage
@@ -167,6 +169,7 @@ import me.him188.ani.app.ui.settings.tabs.about.DevelopersTab
 import me.him188.ani.app.ui.settings.tabs.about.OpenSourceLibrariesTab
 import me.him188.ani.app.ui.settings.tabs.app.AppearanceGroup
 import me.him188.ani.app.ui.settings.tabs.app.PlayerGroup
+import me.him188.ani.app.ui.settings.tabs.app.PlayerShortcutsSettings
 import me.him188.ani.app.ui.settings.tabs.app.SoftwareUpdateGroup
 import me.him188.ani.app.ui.settings.tabs.app.WatchTogetherGroup
 import me.him188.ani.app.ui.settings.tabs.log.LogTab
@@ -288,6 +291,7 @@ fun SettingsScreen(
             Title(stringResource(Lang.settings_category_app_ui))
             Item(SettingsTab.APPEARANCE)
             Item(SettingsTab.THEME)
+            Item(SettingsTab.PLAYER_SHORTCUTS)
 
             Title(stringResource(Lang.settings_category_data_playback))
             Item(SettingsTab.PLAYER)
@@ -378,6 +382,7 @@ fun SettingsScreen(
 
                             SettingsTab.APPEARANCE -> AppearanceGroup(vm.uiSettings)
                             SettingsTab.THEME -> ThemeGroup(vm.themeSettings)
+                            SettingsTab.PLAYER_SHORTCUTS -> PlayerShortcutsSettings(vm.videoScaffoldConfig)
                             SettingsTab.UPDATE -> SoftwareUpdateGroup(vm.softwareUpdateGroupState)
                             SettingsTab.PLAYER -> {
                                 PlayerGroup(
@@ -1156,6 +1161,7 @@ private fun getIcon(tab: SettingsTab): ImageVector {
         SettingsTab.PROFILE -> Icons.Outlined.AccountCircle
         SettingsTab.APPEARANCE -> Icons.Outlined.SettingsApplications
         SettingsTab.THEME -> Icons.Outlined.Palette
+        SettingsTab.PLAYER_SHORTCUTS -> Icons.Outlined.Keyboard
         SettingsTab.UPDATE -> Icons.Outlined.Update
         SettingsTab.PLAYER -> Icons.Outlined.SmartDisplay
         SettingsTab.MEDIA_SOURCE -> Icons.Outlined.Subscriptions
@@ -1179,6 +1185,7 @@ private fun getName(tab: SettingsTab): String {
         SettingsTab.PROFILE -> stringResource(Lang.settings_tab_account)
         SettingsTab.APPEARANCE -> stringResource(Lang.settings_tab_appearance)
         SettingsTab.THEME -> stringResource(Lang.settings_tab_theme)
+        SettingsTab.PLAYER_SHORTCUTS -> stringResource(Lang.settings_tab_player_shortcuts)
         SettingsTab.PLAYER -> stringResource(Lang.settings_tab_player)
         SettingsTab.MEDIA_SOURCE -> stringResource(Lang.settings_tab_media_source)
         SettingsTab.MEDIA_SELECTOR -> stringResource(Lang.settings_tab_media_selector)

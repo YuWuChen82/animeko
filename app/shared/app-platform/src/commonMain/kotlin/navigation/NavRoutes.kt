@@ -214,6 +214,7 @@ enum class SettingsTab {
 
     APPEARANCE,
     THEME,
+    PLAYER_SHORTCUTS,
     UPDATE,
 
     PLAYER,

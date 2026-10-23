@@ -693,7 +693,7 @@ fun SettingsScope.PlayerGroup(
         PlaybackSpeedItems(config, videoScaffoldConfig)
         PlayerGroupPlatform(videoScaffoldConfig, playerKernelConfig)
     }
-    PlayerPersonalizationSettings(videoScaffoldConfig)
+    PlayerTrackMemorySettings(videoScaffoldConfig)
 }
 
 /**

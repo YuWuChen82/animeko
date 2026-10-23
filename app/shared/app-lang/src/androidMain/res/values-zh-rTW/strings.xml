@@ -46,6 +46,7 @@
     <string name="settings_debug_mode_enabled">已進入除錯模式</string>
     <string name="settings_tab_appearance">介面</string>
     <string name="settings_tab_theme">主題與色彩</string>
+    <string name="settings_tab_player_shortcuts">播放器快捷鍵</string>
     <string name="settings_tab_player">播放器和彈幕過濾</string>
     <string name="settings_tab_media_source">資料源管理</string>
     <string name="settings_tab_media_selector">觀看偏好</string>
@@ -1904,6 +1905,8 @@
     <string name="settings_player_track_memory_description">按同一季動畫條目記住手動選擇；換集、重新進入和重啟後還原，也會記住關閉字幕。</string>
     <string name="settings_player_track_memory_clear">清除軌道記憶</string>
     <string name="settings_player_shortcuts">鍵盤快捷鍵</string>
+    <string name="settings_player_shortcut_press_key">按下按鍵…</string>
+    <string name="settings_player_shortcut_capture_hint">點擊右側按鍵框後，按下字母、數字、方向鍵、空格或 F1–F12 綁定。Esc 取消，Backspace 或 Delete 解除綁定；暫不支援組合鍵。</string>
     <string name="settings_player_shortcut_unbound">未綁定</string>
     <string name="settings_player_shortcuts_reset">恢復預設快捷鍵</string>
     <string name="settings_player_shortcut_conflict">按鍵已被佔用</string>

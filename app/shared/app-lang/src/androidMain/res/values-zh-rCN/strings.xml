@@ -46,6 +46,7 @@
     <string name="settings_debug_mode_enabled">已进入调试模式</string>
     <string name="settings_tab_appearance">界面</string>
     <string name="settings_tab_theme">主题与色彩</string>
+    <string name="settings_tab_player_shortcuts">播放器快捷键</string>
     <string name="settings_tab_player">播放器和弹幕过滤</string>
     <string name="settings_tab_media_source">数据源管理</string>
     <string name="settings_tab_media_selector">观看偏好</string>
@@ -1951,6 +1952,8 @@
     <string name="settings_player_track_memory_description">按同一季番剧条目记住手动选择；换集、重新进入和重启后恢复，也会记住关闭字幕。</string>
     <string name="settings_player_track_memory_clear">清除轨道记忆</string>
     <string name="settings_player_shortcuts">键盘快捷键</string>
+    <string name="settings_player_shortcut_press_key">按下按键…</string>
+    <string name="settings_player_shortcut_capture_hint">点击右侧按键框后，按下字母、数字、方向键、空格或 F1–F12 绑定。Esc 取消，Backspace 或 Delete 解除绑定；暂不支持组合键。</string>
     <string name="settings_player_shortcut_unbound">未绑定</string>
     <string name="settings_player_shortcuts_reset">恢复默认快捷键</string>
     <string name="settings_player_shortcut_conflict">按键已被占用</string>
