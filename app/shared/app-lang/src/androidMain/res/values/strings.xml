@@ -1935,8 +1935,6 @@
     <string name="settings_player_shortcut_speed_2">Playback speed 2x</string>
     <string name="settings_player_shortcut_speed_3">Playback speed 3x</string>
     <string name="settings_update_personal_source">Update source: %1$s</string>
-    <string name="danmaku_toggle_enabled">Danmaku enabled</string>
-    <string name="danmaku_toggle_disabled">Danmaku disabled</string>
 </resources>
 
 <!--@formatter:on-->
