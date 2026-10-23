@@ -149,7 +149,10 @@ import me.him188.ani.app.ui.lang.episode_comments_with_count
 import me.him188.ani.app.ui.lang.episode_send_danmaku
 import me.him188.ani.app.ui.lang.foundation_richtext_external_app_link_warning_prefix
 import me.him188.ani.app.ui.lang.foundation_richtext_open_failed_prefix
+import me.him188.ani.app.ui.lang.settings_option_enabled
 import me.him188.ani.app.ui.lang.subject_details_tab_details
+import me.him188.ani.app.ui.lang.subject_episode_danmaku_disabled
+import me.him188.ani.app.ui.lang.video_player_enable_danmaku
 import me.him188.ani.app.ui.mediaselect.MediaSelectorMode
 import me.him188.ani.app.ui.mediaselect.common.MediaSelectorDialog
 import me.him188.ani.app.ui.mediaselect.common.MediaSelectorDialogContent
