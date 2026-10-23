@@ -48,6 +48,7 @@ import me.him188.ani.app.ui.foundation.animation.AniAnimatedVisibility
 import me.him188.ani.app.ui.foundation.layout.currentWindowAdaptiveInfo1
 import me.him188.ani.app.ui.foundation.layout.isHeightAtLeastMedium
 import me.him188.ani.app.ui.foundation.layout.isWidthAtLeastMedium
+import me.him188.ani.app.ui.settings.tabs.AniHelperDestination
 import me.him188.ani.utils.platform.annotations.TestOnly
 
 @Composable
@@ -152,7 +153,7 @@ fun BoxScope.UpdateNotifier(
             // 提示有新版本
 
             val onDetailsClick =
-                { uriHandler.openUri("https://github.com/open-ani/animeko/releases/tag/v${newVersion.name}") }
+                { uriHandler.openUri(AniHelperDestination.releaseNotesUrl(newVersion.name)) }
 
             when (layoutKind) {
                 UpdateNotifierLayoutKind.POPUP -> {

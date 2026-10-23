@@ -21,6 +21,7 @@ import me.him188.ani.app.ui.lang.settings_help_feedback
 import me.him188.ani.app.ui.lang.settings_help_github
 import me.him188.ani.app.ui.lang.settings_help_telegram
 import me.him188.ani.app.ui.lang.settings_help_website
+import me.him188.ani.app.ui.update.PersonalReleaseUpdates
 import org.jetbrains.compose.resources.stringResource
 
 object AniHelperDestination {
@@ -28,7 +29,12 @@ object AniHelperDestination {
     const val GITHUB_CONTRIBUTORS = "https://github.com/open-ani/animeko/graphs/contributors"
     const val ANI_WEBSITE = "https://myani.org"
     const val ISSUE_TRACKER = "https://github.com/open-ani/animeko/issues"
-    const val RELEASE_PREFIX = "https://github.com/open-ani/animeko/releases/tag/v"
+    fun releaseNotesUrl(version: String): String {
+        val name = version.removePrefix("v")
+        val releases = if (name.contains("-personal.")) PersonalReleaseUpdates.RELEASES_URL
+        else "$GITHUB_HOME/releases"
+        return "$releases/tag/v$name"
+    }
 
     const val GITHUB_REPO = "https://github.com/him188/ani"
     const val BANGUMI = "https://bangumi.tv"

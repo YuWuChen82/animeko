@@ -73,7 +73,7 @@ internal fun TvSettingsItems.about(
                 open(TvSettingsDialog.Info("version", title, "$description\n\n$version"))
             }
             action("check-update", stringResource(Lang.settings_update_check), onClick = onCheckUpdate)
-            link("releases", stringResource(Lang.settings_about_release_notes), AniHelperDestination.RELEASE_PREFIX + version)
+            link("releases", stringResource(Lang.settings_about_release_notes), AniHelperDestination.releaseNotesUrl(version))
             link("website", stringResource(Lang.settings_about_website), AniHelperDestination.ANI_WEBSITE)
             link("feedback", stringResource(Lang.settings_about_feedback), AniHelperDestination.ISSUE_TRACKER)
             link("source-code", stringResource(Lang.settings_about_source_code), AniHelperDestination.GITHUB_HOME)

@@ -336,7 +336,7 @@ fun SettingsScreen(
                         onClickReleaseNotes = {
                             browserNavigator.openBrowser(
                                 context,
-                                AniHelperDestination.RELEASE_PREFIX + vm.aboutTabInfo.version,
+                                AniHelperDestination.releaseNotesUrl(vm.aboutTabInfo.version),
                             )
                         },
                         onClickWebsite = { browserNavigator.openBrowser(context, AniHelperDestination.ANI_WEBSITE) },

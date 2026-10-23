@@ -162,6 +162,13 @@ jobs:
           $version = "$($Matches[1])-personal.$env:GITHUB_RUN_NUMBER.$env:GITHUB_RUN_ATTEMPT"
           "name=$version" >> $env:GITHUB_OUTPUT
 
+      - name: Verify personal update destinations
+        if: steps.sync.outputs.build == 'true'
+        shell: pwsh
+        run: |
+          .\gradlew.bat :app:shared:ui-settings:desktopTest --tests '*ReleaseNotesUrlTest' --tests '*UpdateNotifierDetailsTest' --tests '*PersonalReleaseUpdatesTest' --console=plain --no-configuration-cache
+          if ($LASTEXITCODE -ne 0) { throw 'Personal update regression tests failed' }
+
       - name: Package Windows personal edition
         if: steps.sync.outputs.build == 'true'
         shell: pwsh
