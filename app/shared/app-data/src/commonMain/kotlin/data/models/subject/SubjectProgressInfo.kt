@@ -65,13 +65,16 @@ data class SubjectProgressInfo(
 
         val target = sortedMainEpisodes[targetIndex]
         val previous = sortedMainEpisodes.getOrNull(targetIndex - 1)
-        val watched = (continueWatchingStatus as? ContinueWatchingStatus.Continue)
-            ?: (continueWatchingStatus as? ContinueWatchingStatus.Watched)
+        val (watchedEpisodeEp, watchedEpisodeSort) = when (val current = continueWatchingStatus) {
+            is ContinueWatchingStatus.Continue -> current.watchedEpisodeEp to current.watchedEpisodeSort
+            is ContinueWatchingStatus.Watched -> current.episodeEp to current.episodeSort
+            else -> null to null
+        }
         val status = ContinueWatchingStatus.Continue(
             episodeEp = target.episodeInfo.ep,
             episodeSort = target.episodeInfo.sort,
-            watchedEpisodeEp = previous?.episodeInfo?.ep ?: watched?.watchedEpisodeEp,
-            watchedEpisodeSort = previous?.episodeInfo?.sort ?: watched?.watchedEpisodeSort ?: target.episodeInfo.sort,
+            watchedEpisodeEp = previous?.episodeInfo?.ep ?: watchedEpisodeEp,
+            watchedEpisodeSort = previous?.episodeInfo?.sort ?: watchedEpisodeSort ?: target.episodeInfo.sort,
         )
         return copy(continueWatchingStatus = status, nextEpisodeIdToPlay = target.episodeId)
     }
