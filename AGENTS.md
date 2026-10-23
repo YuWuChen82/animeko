@@ -40,6 +40,8 @@ If you change server API, you can then use `./gradlew generateOpenApiForAnimeko`
 
 `PERSONAL_FEATURES.md` 只记录个人版相对官方版新增的功能；适配、链接修正和一般缺陷修复不单独列入。既有功能行为变化时仅修正原有描述，新增功能须保留根目录 `README.md` 对该清单的引用。发版前核对功能描述与实际实现及发布版本。
 
+个人版 GitHub Release 的标题和更新日志使用中文；发布工作流生成的默认说明也遵循此要求。
+
 相关任务收尾运行原版检查脚本：`python -X utf8 .agents/skills/llm-wiki/scripts/wiki_lint.py E:/知识库/projects/ani --required-fm type,title,tags,created,updated,project,status,summary,sources --json`，阅读结果并修正结构问题。语义粒度和来源真实性由 agent 判断，没有后台监听或强制收尾 hook。
 
 源码位于 `E:/Ani/animeko-personal`。其 AGENTS.md 和 docs/contributing/ 的开发约束继续有效；涉及子系统时先读对应文档。主 agent 汇总子 agent 的证据写入知识库，避免同时修改同一页面。普通已授权的知识维护无需逐次询问。

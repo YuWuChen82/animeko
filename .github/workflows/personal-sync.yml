@@ -203,5 +203,16 @@ jobs:
         run: |
           $sha = git rev-parse HEAD
           $version = '${{ steps.version.outputs.name }}'
-          gh release create "v$version" Animeko-personal-windows-x64.zip Animeko-personal-windows-x64.zip.sha1 Animeko-personal-windows-x64.zip.manifest.json --repo $env:GITHUB_REPOSITORY --target $sha --latest --title "Windows personal $version" --notes 'Personal Windows channel: customizable shortcuts, per-season audio/subtitle memory, and in-app updates from this repository. Upstream sync and Windows packaging completed successfully. Existing incorrect cache mappings are not migrated.'
+          $notesFile = Join-Path $env:RUNNER_TEMP 'personal-release-notes.md'
+          @'
+          Windows 个人版更新。
+
+          - 支持自定义播放器快捷键。
+          - 按番剧条目记忆音轨和字幕偏好。
+          - 支持从个人仓库检查、下载和安装更新。
+          - 已同步官方仓库更新，并完成 Windows 打包。
+
+          说明：已有的错误缓存关联不会自动修正。
+          '@ | Set-Content -LiteralPath $notesFile -Encoding utf8
+          gh release create "v$version" Animeko-personal-windows-x64.zip Animeko-personal-windows-x64.zip.sha1 Animeko-personal-windows-x64.zip.manifest.json --repo $env:GITHUB_REPOSITORY --target $sha --latest --title "Windows 个人版 $version" --notes-file $notesFile
           if ($LASTEXITCODE -ne 0) { throw 'Personal release publishing failed' }
