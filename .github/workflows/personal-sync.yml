@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: personal-main
@@ -27,6 +28,16 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
+
+      - name: Keep only the personal Windows workflow enabled
+        shell: pwsh
+        run: |
+          $workflows = gh api "repos/$env:GITHUB_REPOSITORY/actions/workflows" --paginate --jq '.workflows[] | select(.path != ".github/workflows/personal-sync.yml") | .id'
+          if ($LASTEXITCODE -ne 0) { throw 'Could not list inherited workflows' }
+          foreach ($workflow in $workflows) {
+            gh api --method PUT "repos/$env:GITHUB_REPOSITORY/actions/workflows/$workflow/disable"
+            if ($LASTEXITCODE -ne 0) { throw "Could not disable inherited workflow $workflow" }
+          }
 
       - name: Prepare an upstream merge without publishing it
         id: sync
@@ -86,13 +97,8 @@ jobs:
 
       - uses: android-actions/setup-android@v3
         if: steps.sync.outputs.build == 'true'
-      - name: Install Android platform required by the build
-        if: steps.sync.outputs.build == 'true'
-        shell: pwsh
-        run: |
-          $sdk = (Select-String -LiteralPath gradle.properties -Pattern '^android.compile.sdk=(\d+)$').Matches.Groups[1].Value
-          sdkmanager "platforms;android-$sdk"
-          if ($LASTEXITCODE -ne 0) { throw 'Android platform installation failed' }
+        with:
+          packages: platform-tools
 
       - uses: gradle/actions/setup-gradle@v4
         if: steps.sync.outputs.build == 'true'
