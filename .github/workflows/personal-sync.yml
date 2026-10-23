@@ -149,6 +149,7 @@ jobs:
           @"
           ani.dandanplay.app.id=$env:DANDANPLAY_APP_ID
           ani.dandanplay.app.secret=$env:DANDANPLAY_APP_SECRET
+          ani.desktop.proguard=false
           "@ | Set-Content -LiteralPath 'local.properties' -Encoding ascii
 
       - name: Select a monotonic personal build version
@@ -166,11 +167,11 @@ jobs:
         shell: pwsh
         run: |
           $version = '${{ steps.version.outputs.name }}'
-          .\gradlew.bat :ci-helper:zipDesktopDistribution :ci-helper:generateDesktopDistributionManifest "-Pversion.name=$version" "-PCI_TAG=v$version" --console=plain --no-configuration-cache
+          .\gradlew.bat :ci-helper:zipDesktopDistribution :ci-helper:generateDesktopDistributionManifest "-Pversion.name=$version" "-PCI_TAG=v$version" --console=plain --parallel --no-configuration-cache
           if ($LASTEXITCODE -ne 0) { throw 'Packaging failed; upstream merge was not published' }
           $package = "ci-helper/build/distributions/ani-$version.zip"
-          Copy-Item -LiteralPath $package -Destination 'Animeko-personal-windows-x64.zip'
-          Copy-Item -LiteralPath "$package.manifest.json" -Destination 'Animeko-personal-windows-x64.zip.manifest.json'
+          Move-Item -LiteralPath $package -Destination 'Animeko-personal-windows-x64.zip' -Force
+          Move-Item -LiteralPath "$package.manifest.json" -Destination 'Animeko-personal-windows-x64.zip.manifest.json' -Force
           $checksum = (Get-FileHash -LiteralPath 'Animeko-personal-windows-x64.zip' -Algorithm SHA1).Hash.ToLowerInvariant()
           Set-Content -LiteralPath 'Animeko-personal-windows-x64.zip.sha1' -Value $checksum -Encoding ascii
 
