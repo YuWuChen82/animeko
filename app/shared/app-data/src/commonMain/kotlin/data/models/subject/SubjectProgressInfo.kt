@@ -13,6 +13,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import me.him188.ani.app.data.models.episode.EpisodeCollectionInfo
 import me.him188.ani.app.data.models.episode.EpisodeInfo
+import me.him188.ani.app.data.models.player.EpisodeHistory
 import me.him188.ani.app.data.models.subject.SubjectProgressInfo.Companion.compute
 import me.him188.ani.app.domain.episode.EpisodeCompletionContext.isKnownCompleted
 import me.him188.ani.datasources.api.EpisodeSort
@@ -34,6 +35,47 @@ data class SubjectProgressInfo(
      */
     val nextEpisodeIdToPlay: Int?,
 ) {
+    /**
+     * Prefer the most recently played local episode when choosing a resume target. Bangumi collection
+     * progress can lag behind playback when a viewer switches episodes before marking one watched.
+     * Older local history must not move the target behind episodes already marked watched in Bangumi.
+     */
+    fun withPlaybackHistory(
+        episodes: List<EpisodeCollectionInfo>,
+        histories: List<EpisodeHistory>,
+    ): SubjectProgressInfo {
+        val sortedMainEpisodes = episodes
+            .filter { it.episodeInfo.sort is EpisodeSort.Normal }
+            .sortedBy { it.episodeInfo.sort }
+        val latestWatchedIndex = sortedMainEpisodes.indexOfLast {
+            it.collectionType == UnifiedCollectionType.DONE || it.collectionType == UnifiedCollectionType.DROPPED
+        }
+        val indexById = sortedMainEpisodes.mapIndexed { index, episode -> episode.episodeId to index }.toMap()
+        val latestHistory = histories.asSequence()
+            .filterNot { it.isDeleted }
+            .filter { it.episodeId in indexById }
+            .maxByOrNull { it.updatedAtMillis }
+            ?: return this
+        val historyIndex = indexById.getValue(latestHistory.episodeId)
+        val targetIndex = if (latestHistory.isFinished) historyIndex + 1 else historyIndex
+        if (targetIndex !in sortedMainEpisodes.indices) return this
+        if (targetIndex < latestWatchedIndex ||
+            (latestHistory.isFinished && targetIndex == latestWatchedIndex)
+        ) return this
+
+        val target = sortedMainEpisodes[targetIndex]
+        val previous = sortedMainEpisodes.getOrNull(targetIndex - 1)
+        val watched = (continueWatchingStatus as? ContinueWatchingStatus.Continue)
+            ?: (continueWatchingStatus as? ContinueWatchingStatus.Watched)
+        val status = ContinueWatchingStatus.Continue(
+            episodeEp = target.episodeInfo.ep,
+            episodeSort = target.episodeInfo.sort,
+            watchedEpisodeEp = previous?.episodeInfo?.ep ?: watched?.watchedEpisodeEp,
+            watchedEpisodeSort = previous?.episodeInfo?.sort ?: watched?.watchedEpisodeSort ?: target.episodeInfo.sort,
+        )
+        return copy(continueWatchingStatus = status, nextEpisodeIdToPlay = target.episodeId)
+    }
+
     /**
      * 仅供 [compute]
      */

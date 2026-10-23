@@ -37,11 +37,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
+import me.him188.ani.app.data.models.comment.CommentReportTargetType
+import me.him188.ani.app.data.models.player.playProgressByEpisodeId
 import me.him188.ani.app.data.models.subject.RelatedCharacterInfo
 import me.him188.ani.app.data.models.subject.SelfRatingInfo
 import me.him188.ani.app.data.models.subject.SubjectCollectionInfo
 import me.him188.ani.app.data.models.subject.SubjectInfo
 import me.him188.ani.app.data.models.subject.SubjectProgressInfo
+import me.him188.ani.app.data.network.AniCommentReportService
 import me.him188.ani.app.data.network.BangumiRelatedPeopleService
 import me.him188.ani.app.data.repository.episode.BangumiCommentRepository
 import me.him188.ani.app.data.repository.episode.EpisodeCollectionRepository
@@ -49,9 +52,6 @@ import me.him188.ani.app.data.repository.player.EpisodePlayHistoryRepository
 import me.him188.ani.app.data.repository.subject.SetSubjectCollectionTypeOrDeleteUseCase
 import me.him188.ani.app.data.repository.subject.SubjectCollectionRepository
 import me.him188.ani.app.data.repository.subject.SubjectRelationsRepository
-import me.him188.ani.app.data.models.comment.CommentReportTargetType
-import me.him188.ani.app.data.models.player.playProgressByEpisodeId
-import me.him188.ani.app.data.network.AniCommentReportService
 import me.him188.ani.app.ui.comment.CommentMapperContext.parseToUIComment
 import me.him188.ani.app.ui.comment.CommentMapperContext.toCommentVoteValue
 import me.him188.ani.app.ui.comment.CommentReportState
@@ -252,11 +252,11 @@ class DefaultSubjectDetailsStateFactory : SubjectDetailsStateFactory, KoinCompon
 
         // 只订阅本条目剧集的播放记录, 换算成按剧集 id 索引的进度
         @OptIn(ExperimentalCoroutinesApi::class)
-        val playProgressFlow = subjectCollectionFlow
+        val playHistoryFlow = subjectCollectionFlow
             .map { collection -> collection.episodes.map { it.episodeId } }
             .distinctUntilChanged()
             .flatMapLatest { episodeIds -> episodePlayHistoryRepository.flowByEpisodeIds(episodeIds) }
-            .map { it.playProgressByEpisodeId() }
+            .shareIn(this, started = SharingStarted.Eagerly, replay = 1)
 
         val state = SubjectDetailsState(
             subjectId = subjectInfo.subjectId,
@@ -310,12 +310,12 @@ class DefaultSubjectDetailsStateFactory : SubjectDetailsStateFactory, KoinCompon
             uiState = combine(
                 minuteTicker,
                 subjectCollectionFlow,
-                playProgressFlow,
+                playHistoryFlow,
                 combine(relatedPersonsFlow, relatedCharactersFlow) { persons, characters ->
                     persons?.size to characters?.size
                 },
                 combine(editableSubjectCollectionTypeState.presentationFlow, ratingUiStateFlow) { c, r -> c to r },
-            ) { _, collection, playProgress, (staffCount, charactersCount), (collectionTypeEdit, rating) ->
+            ) { _, collection, playHistories, (staffCount, charactersCount), (collectionTypeEdit, rating) ->
                 val now = Clock.System.now()
                 SubjectDetailsUiState(
                     subjectId = subjectId,
@@ -326,8 +326,12 @@ class DefaultSubjectDetailsStateFactory : SubjectDetailsStateFactory, KoinCompon
                     progressInfo = SubjectProgressInfo.compute(
                         collection.subjectInfo, collection.episodes, PackedDate.now(),
                         recurrence = collection.recurrence,
+                    ).withPlaybackHistory(collection.episodes, playHistories),
+                    episodeListUiState = EpisodeListUiState.from(
+                        collection,
+                        now,
+                        playHistories.playProgressByEpisodeId(),
                     ),
-                    episodeListUiState = EpisodeListUiState.from(collection, now, playProgress),
                     totalStaffCount = staffCount,
                     totalCharactersCount = charactersCount,
                     collectionTypeEdit = collectionTypeEdit,

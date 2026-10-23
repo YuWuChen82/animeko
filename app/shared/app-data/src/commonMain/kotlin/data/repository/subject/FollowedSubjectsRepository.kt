@@ -21,6 +21,7 @@ import me.him188.ani.app.data.repository.RepositoryException
 import me.him188.ani.app.data.repository.RepositoryUnknownException
 import me.him188.ani.app.data.repository.episode.AnimeScheduleRepository
 import me.him188.ani.app.data.repository.episode.EpisodeCollectionRepository
+import me.him188.ani.app.data.repository.player.EpisodePlayHistoryRepository
 import me.him188.ani.app.data.repository.user.SettingsRepository
 import me.him188.ani.app.domain.session.SessionStateProvider
 import me.him188.ani.app.domain.session.restartOnNewLogin
@@ -39,6 +40,7 @@ class FollowedSubjectsRepository(
     private val subjectCollectionRepository: SubjectCollectionRepository,
     private val animeScheduleRepository: AnimeScheduleRepository,
     private val episodeCollectionRepository: EpisodeCollectionRepository,
+    private val episodePlayHistoryRepository: EpisodePlayHistoryRepository,
 //    private val subjectProgressRepository: EpisodeProgressRepository,
 //    private val subjectCollectionDao: SubjectCollectionDao,
     private val sessionManager: SessionStateProvider,
@@ -109,33 +111,37 @@ class FollowedSubjectsRepository(
         subjectCollectionInfoList: List<SubjectCollectionInfo>,
         now: PackedDate,
     ): Flow<List<FollowedSubjectInfo>> = combine(
-        subjectCollectionInfoList.map { info ->
-            episodeCollectionRepository.subjectEpisodeCollectionInfosFlow(info.subjectId)
+        subjectCollectionInfoList.map { subjectCollectionInfo ->
+            episodeCollectionRepository.subjectEpisodeCollectionInfosFlow(subjectCollectionInfo.subjectId)
+                .flatMapLatest { episodes ->
+                    episodePlayHistoryRepository.flowByEpisodeIds(episodes.map { it.episodeId }).map { histories ->
+                        FollowedSubjectInfo(
+                            subjectCollectionInfo,
+                            SubjectAiringInfo.computeFromEpisodeList(
+                                episodes.map { it.episodeInfo },
+                                subjectCollectionInfo.subjectInfo.airDate,
+                                subjectCollectionInfo.recurrence,
+                            ),
+                            SubjectProgressInfo.compute(
+                                subjectCollectionInfo.subjectInfo,
+                                episodes,
+                                now,
+                                subjectCollectionInfo.recurrence,
+                            ).withPlaybackHistory(episodes, histories),
+                            NsfwMode.DISPLAY,
+                        )
+                    }
+                }
         },
-    ) { array ->
-        array.toList()
-    }.combine(nsfwModeSettingsFlow) { epInfoLists, nsfwMode ->
-        subjectCollectionInfoList.asSequence().zip(epInfoLists.asSequence()) { subjectCollectionInfo, episodes ->
-            // 计算每个条目的播放进度
-            FollowedSubjectInfo(
-                subjectCollectionInfo,
-                SubjectAiringInfo.computeFromEpisodeList(
-                    episodes.map { it.episodeInfo },
-                    subjectCollectionInfo.subjectInfo.airDate,
-                    subjectCollectionInfo.recurrence,
-                ),
-                SubjectProgressInfo.compute(
-                    subjectCollectionInfo.subjectInfo,
-                    episodes,
-                    now,
-                    subjectCollectionInfo.recurrence,
-                ),
-                nsfwMode =
-                    if (subjectCollectionInfo.subjectInfo.nsfw) nsfwMode
-                    else NsfwMode.DISPLAY,
-            )
-        }.toList()
-    }.flowOn(defaultDispatcher)
+    ) { array -> array.toList() }
+        .combine(nsfwModeSettingsFlow) { followedSubjects, nsfwMode ->
+            followedSubjects.map { item ->
+                item.copy(
+                    nsfwMode = if (item.subjectInfo.nsfw) nsfwMode else NsfwMode.DISPLAY,
+                )
+            }
+        }
+        .flowOn(defaultDispatcher)
 
     fun followedSubjectsPager(
         updatePeriod: Duration = 1.hours,

@@ -26,3 +26,21 @@ Additional requirements:
 ## Generating Client
 
 If you change server API, you can then use `./gradlew generateOpenApiForAnimeko` to automatically re-generate the client. Don't manually write http client.
+
+<!-- project-wiki:start -->
+## Ani 项目 Markdown Wiki
+
+已安装原版 llm-wiki skill。项目 ID 为 ani，总入口为 `E:/知识库/README.md`，项目 Wiki 位于 `E:/知识库/projects/ani/`，原始资料位于 `E:/知识库/raw/ani/`。
+
+开始 Ani 讨论或开发前，先读本工作区 `.codex/knowledge.json`，再读该 Wiki 的 SCHEMA.md 和 index.md，按 llm-wiki 的 ingest/query/lint 工作流维护。默认只检索 Ani；明确切换项目时再选择独立目录，禁止混写。
+
+本机直接搜索 Markdown：`rg -n -F --glob '*.md' -- '<关键词>' 'E:/知识库/projects/ani'`。包含索引、规范与日志，必要时由 agent 扩展同义词。不执行默认 init_wiki.py/setup_wiki.py 的向量 runtime 安装，不使用默认 hybrid search，不创建向量数据库；上游代码保持原样。
+
+讨论形成有后续价值的新方案、明确决定，或开发产生进展、阻塞和验证观察时，主动保存来源、状态与摘要，维护相关引用、索引及祖先摘要。每个独立决定单独成页；同一决定的补充证据可更新原页，替代决定另建并互链。没有新知识时无需新增页面。
+
+每次新增、修改或修复用户可见功能时，必须同步更新仓库根目录 `PERSONAL_FEATURES.md`，让个人版相对官方版的功能清单与当前代码一致；新增个人版功能还必须在根目录 `README.md` 中保留指向该清单的引用。发版前核对这两份文档与实际实现及发布版本。
+
+相关任务收尾运行原版检查脚本：`python -X utf8 .agents/skills/llm-wiki/scripts/wiki_lint.py E:/知识库/projects/ani --required-fm type,title,tags,created,updated,project,status,summary,sources --json`，阅读结果并修正结构问题。语义粒度和来源真实性由 agent 判断，没有后台监听或强制收尾 hook。
+
+源码位于 `E:/Ani/animeko-personal`。其 AGENTS.md 和 docs/contributing/ 的开发约束继续有效；涉及子系统时先读对应文档。主 agent 汇总子 agent 的证据写入知识库，避免同时修改同一页面。普通已授权的知识维护无需逐次询问。
+<!-- project-wiki:end -->

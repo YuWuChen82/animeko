@@ -155,6 +155,7 @@ fun KoinApplication.repositoryModules(
             subjectCollectionRepository = get(),
             animeScheduleRepository = get(),
             episodeCollectionRepository = get(),
+            episodePlayHistoryRepository = get(),
             settingsRepository = get(),
             sessionManager = get(),
         )

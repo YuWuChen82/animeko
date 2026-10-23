@@ -9,6 +9,9 @@
 
 package me.him188.ani.app.data.models.subject
 
+import me.him188.ani.app.data.models.episode.EpisodeCollectionInfo
+import me.him188.ani.app.data.models.episode.EpisodeInfo
+import me.him188.ani.app.data.models.player.EpisodeHistory
 import me.him188.ani.app.data.models.subject.SubjectProgressInfo.Episode
 import me.him188.ani.datasources.api.EpisodeSort
 import me.him188.ani.datasources.api.EpisodeType
@@ -267,6 +270,68 @@ class SubjectProgressInfoTest {
             )
             assertEquals(2, nextEpisodeIdToPlay)
         }
+    }
+
+    @Test
+    fun `latest local playback episode overrides stale Bangumi progress`() {
+        val episodes = (1..4).map { number ->
+            EpisodeCollectionInfo(
+                EpisodeInfo(
+                    episodeId = number,
+                    type = EpisodeType.MainStory,
+                    sort = EpisodeSort(number),
+                    ep = EpisodeSort(number),
+                ),
+                if (number == 1) DONE else WISH,
+            )
+        }
+        val bangumiProgress = SubjectProgressInfo.compute(
+            subjectStarted = true,
+            episodes = episodes.mapIndexed { index, episode ->
+                ep(episode.collectionType, index + 1, isKnownCompleted = true, id = episode.episodeId)
+            },
+            subjectAirDate = Invalid,
+        )
+
+        val result = bangumiProgress.withPlaybackHistory(
+            episodes,
+            listOf(
+                EpisodeHistory(episodeId = 3, positionMillis = 20 * 60_000L, updatedAtMillis = 10),
+                EpisodeHistory(episodeId = 4, positionMillis = 0, updatedAtMillis = 20),
+            ),
+        )
+
+        assertEquals(4, result.nextEpisodeIdToPlay)
+        assertEquals(EpisodeSort(4), (result.continueWatchingStatus as ContinueWatchingStatus.Continue).episodeSort)
+    }
+
+    @Test
+    fun `older local history cannot move resume target behind Bangumi progress`() {
+        val episodes = (1..4).map { number ->
+            EpisodeCollectionInfo(
+                EpisodeInfo(
+                    episodeId = number,
+                    type = EpisodeType.MainStory,
+                    sort = EpisodeSort(number),
+                    ep = EpisodeSort(number),
+                ),
+                if (number <= 3) DONE else WISH,
+            )
+        }
+        val bangumiProgress = SubjectProgressInfo.compute(
+            subjectStarted = true,
+            episodes = episodes.mapIndexed { index, episode ->
+                ep(episode.collectionType, index + 1, isKnownCompleted = true, id = episode.episodeId)
+            },
+            subjectAirDate = Invalid,
+        )
+
+        val result = bangumiProgress.withPlaybackHistory(
+            episodes,
+            listOf(EpisodeHistory(episodeId = 2, positionMillis = 20 * 60_000L, updatedAtMillis = 10)),
+        )
+
+        assertEquals(4, result.nextEpisodeIdToPlay)
     }
 }
 
