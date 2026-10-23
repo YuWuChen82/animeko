@@ -120,6 +120,21 @@ jobs:
         with:
           cache-read-only: false
 
+      - name: Configure Dandanplay API credentials
+        if: steps.sync.outputs.build == 'true'
+        shell: pwsh
+        env:
+          DANDANPLAY_APP_ID: ${{ secrets.DANDANPLAY_APP_ID }}
+          DANDANPLAY_APP_SECRET: ${{ secrets.DANDANPLAY_APP_SECRET }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:DANDANPLAY_APP_ID) -or [string]::IsNullOrWhiteSpace($env:DANDANPLAY_APP_SECRET)) {
+            throw 'Configure DANDANPLAY_APP_ID and DANDANPLAY_APP_SECRET under Settings > Secrets and variables > Actions before building a personal release.'
+          }
+          @"
+          ani.dandanplay.app.id=$env:DANDANPLAY_APP_ID
+          ani.dandanplay.app.secret=$env:DANDANPLAY_APP_SECRET
+          "@ | Set-Content -LiteralPath 'local.properties' -Encoding ascii
+
       - name: Select a monotonic personal build version
         if: steps.sync.outputs.build == 'true'
         id: version
