@@ -112,4 +112,3 @@ jobs:
             Animeko-personal-windows-x64.zip.sha1
             Animeko-personal-windows-x64.zip.manifest.json
           retention-days: 3
-
