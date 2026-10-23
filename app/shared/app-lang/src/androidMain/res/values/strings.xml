@@ -1534,6 +1534,8 @@
     <string name="subject_episode_statistics_danmaku_sources_count">%1$d danmaku sources, %2$d danmaku in total</string>
     <string name="subject_episode_statistics_show_less">Show less</string>
     <string name="subject_episode_statistics_show_more">Show more</string>
+    <string name="subject_episode_danmaku_toggle_enabled">Danmaku enabled</string>
+    <string name="subject_episode_danmaku_toggle_disabled">Danmaku disabled</string>
     <string name="subject_episode_statistics_danmaku_disabled">Danmaku is disabled. You can enable it in the player</string>
     <string name="subject_episode_statistics_danmaku_loading">Loading danmaku</string>
     <string name="subject_episode_statistics_now_playing">Now playing: </string>
