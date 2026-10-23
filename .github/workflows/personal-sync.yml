@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: personal-main
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   windows:
@@ -115,7 +115,8 @@ jobs:
         shell: pwsh
         run: |
           $sha = git rev-parse --short HEAD
-          .\gradlew.bat :app:desktop:createReleaseDistributable "-Pversion.name=personal-$sha" --console=plain --no-configuration-cache
+          $baseVersion = (Select-String -LiteralPath gradle.properties -Pattern '^version.name=(.+)$').Matches.Groups[1].Value.Split('-')[0]
+          .\gradlew.bat :app:desktop:createReleaseDistributable "-Pversion.name=$baseVersion-personal-$sha" --console=plain --no-configuration-cache
           if ($LASTEXITCODE -ne 0) { throw 'Packaging failed; upstream merge was not published' }
 
       - name: Publish a tested upstream merge
