@@ -18,6 +18,7 @@ import kotlinx.coroutines.test.runTest
 import me.him188.ani.app.data.models.preference.VideoScaffoldConfig
 import me.him188.ani.app.data.repository.user.Settings
 import org.openani.mediamp.InternalMediampApi
+import org.openani.mediamp.InternalForInheritanceMediampApi
 import org.openani.mediamp.MediampPlayer
 import org.openani.mediamp.features.MediaMetadata
 import org.openani.mediamp.features.buildPlayerFeatures
@@ -31,7 +32,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-@OptIn(InternalMediampApi::class)
+@OptIn(InternalMediampApi::class, InternalForInheritanceMediampApi::class)
 class PlayerTrackMemoryTest {
     private class MemorySettings : Settings<VideoScaffoldConfig> {
         override val flow = MutableStateFlow(VideoScaffoldConfig.Default)
