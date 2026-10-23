@@ -29,5 +29,3 @@
 个人版每日自动检查并同步官方仓库的更新，在保留上述个人版功能的基础上持续跟进官方变更。
 
 个人版应用内检查和下载更新时使用 [YuWuChen82/animeko Releases](https://github.com/YuWuChen82/animeko/releases)，不会检查官方版发布源。当前这个更新渠道提供 Windows x64 个人版。
-
-新版本提示中的“查看详情”和“关于”页面的更新日志入口，会打开对应个人版版本的 Release 页面。

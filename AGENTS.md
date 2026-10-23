@@ -38,7 +38,7 @@ If you change server API, you can then use `./gradlew generateOpenApiForAnimeko`
 
 讨论形成有后续价值的新方案、明确决定，或开发产生进展、阻塞和验证观察时，主动保存来源、状态与摘要，维护相关引用、索引及祖先摘要。每个独立决定单独成页；同一决定的补充证据可更新原页，替代决定另建并互链。没有新知识时无需新增页面。
 
-每次新增、修改或修复用户可见功能时，必须同步更新仓库根目录 `PERSONAL_FEATURES.md`，让个人版相对官方版的功能清单与当前代码一致；新增个人版功能还必须在根目录 `README.md` 中保留指向该清单的引用。发版前核对这两份文档与实际实现及发布版本。
+`PERSONAL_FEATURES.md` 只记录个人版相对官方版新增的功能；适配、链接修正和一般缺陷修复不单独列入。既有功能行为变化时仅修正原有描述，新增功能须保留根目录 `README.md` 对该清单的引用。发版前核对功能描述与实际实现及发布版本。
 
 相关任务收尾运行原版检查脚本：`python -X utf8 .agents/skills/llm-wiki/scripts/wiki_lint.py E:/知识库/projects/ani --required-fm type,title,tags,created,updated,project,status,summary,sources --json`，阅读结果并修正结构问题。语义粒度和来源真实性由 agent 判断，没有后台监听或强制收尾 hook。
 
